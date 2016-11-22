@@ -7,7 +7,8 @@ setup(
     install_requires=[
         'Flask',
         'wtforms',
-        'flask-wtf',
+        'Flask-Wtf',
+        'Flask-Bootstrap',
         'python-keystoneclient',
     ],
 )

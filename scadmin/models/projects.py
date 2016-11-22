@@ -25,14 +25,47 @@ __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 from flask import session
 
 from scadmin.auth import get_session
+from scadmin.exceptions import InsufficientAuthorization
 
 from keystoneclient.v3 import client as keystone_client
+from keystoneauth1.exceptions.http import Forbidden
+
+
+
+
+class Project:
+    def __init__(self, name_or_id=None):
+        self.session = get_session()
+        self.keystone = keystone_client.Client(session=self.session)
+        if name_or_id == None:
+            name_or_id = session['auth']['project_id']
+
+        try:
+            self.project = self.keystone.projects.get(name_or_id)
+        except Forbidden:
+            projects = self.keystone.projects.list(user=self.session.get_user_id())
+            for project in projects:
+                if project.id == self.session.auth.project_id:
+                    self.project = project
+
+    def members(self):
+        try:
+            roles = {r.id: r.name for r in self.keystone.roles.list()}
+            assignments = self.keystone.role_assignments.list(project=self.project.id)
+        except Forbidden:
+            raise InsufficientAuthorization
+        
+        return {a.user['id']: roles[a.role['id']] for a in assignments}
+
+    def add_suer(self, userid):
+        pass
 
 
 class Projects:
     def __init__(self):
-        self.session = get_session(session['auth'])
+        self.session = get_session()
         self.keystone = keystone_client.Client(session=self.session)
+        self.project = Project(self.session.auth.project_id).project
 
     def list(self):
         try:

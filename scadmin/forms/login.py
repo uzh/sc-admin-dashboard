@@ -22,10 +22,12 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from wtforms import Form, StringField, PasswordField, validators
+from wtforms import Form, StringField, PasswordField, SubmitField, validators
+from flask_wtf import FlaskForm
 
-class LoginForm(Form):
+class LoginForm(FlaskForm):
     username = StringField('Username', [validators.Length(min=4, max=25)])
     password = PasswordField('Password', [
         validators.DataRequired(),
         validators.Length(min=6)])
+    submit = SubmitField('Login')

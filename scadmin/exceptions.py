@@ -40,8 +40,11 @@ class InvalidUsage(Exception):
 
 class AuthenticationRequired(InvalidUsage):
     status_code = 403
-    
+
     def __init__(self):
-        InvalidUsage.__init__(self, 
-                              message='Authorization header is expected', 
+        InvalidUsage.__init__(self,
+                              message='Authorization header is expected',
                               payload={'code': 'authorization_required'})
+
+class InsufficientAuthorization(Exception):
+    pass

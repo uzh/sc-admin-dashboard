@@ -38,6 +38,15 @@ from keystoneclient.v3 import client as keystone_client
 
 login_bp = Blueprint('auth', __name__)
 
+def fill_session_data(sess):
+    auth = session.get('auth', {})
+    auth['token'] = sess.get_token()
+    auth['user_id'] = sess.get_user_id()
+    auth['project_id'] = sess.auth.project_id
+    auth['project_domain_id'] = sess.auth.project_domain_id
+    auth['roles'] = sess.auth.auth_ref.role_names
+    session['auth'] = auth
+
 def authenticate_with_password(username, password):
     auth_data = {}
     auth = v3.Password(auth_url=config.os_auth_url,
@@ -57,30 +66,29 @@ def authenticate_with_password(username, password):
     app.logger.info("Correctly authenticated as {}".format(username))
     # get new scoped token
     sess = ksession.Session(auth=auth)
-    session['auth'] = {}
-    session['auth']['token'] = sess.get_token()
-    session['auth']['user_id'] = sess.get_user_id()
-    session['auth']['project_id'] = sess.auth.project_id
-    session['auth']['project_domain_id'] = sess.auth.project_domain_id
+    fill_session_data(sess)
     app.logger.info("User {}: switching to tenant {}".format(username, sess.auth.project_id))
 
 
-def get_session(auth):
+def get_session(project_id=None, project_domain_id=None):
+    if not project_id:
+        project_id = session['auth']['project_id']
+        
+    if not project_domain_id:
+        project_domain_id = 'default'
+    
     auth = v3.Token(
         auth_url=config.os_auth_url,
         token=session['auth']['token'],
-        project_id=session['auth']['project_id'],
-        project_domain_name=session['auth']['project_domain_id'],
+        project_id=project_id,
+        project_domain_id=project_domain_id,
     )
     sess = ksession.Session(auth=auth)
     return sess
     
-def authenticate_with_token():
-    sess = get_session(session['auth'])
-    session['auth']['token'] = sess.get_token()
-    session['auth']['user_id'] = sess.get_user_id()
-    session['auth']['project_id'] = sess.auth.project_id
-    session['auth']['project_domain_id'] = sess.auth.project_domain_id
+def authenticate_with_token(project_id=None, project_domain_id='default'):
+    sess = get_session(project_id, project_domain_id)
+    fill_session_data(sess)
     app.logger.info("User {} authenticated on tenant tenant {} using token".format(session['auth']['user_id'], sess.auth.project_id))
 
 
@@ -113,4 +121,5 @@ def login():
 def logout():
     if 'auth' in session:
         del session['auth']
+    session.clear()
     return redirect(url_for('auth.login'))

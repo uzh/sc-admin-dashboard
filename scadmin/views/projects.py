@@ -22,20 +22,55 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import session, request
+from flask import session, request, render_template, redirect
 
-from scadmin.auth import authenticated
-from scadmin.models.projects import Projects
+from scadmin.auth import authenticated, authenticate_with_token
+from scadmin.models.projects import Projects, Project
+from scadmin.exceptions import InsufficientAuthorization
 
 from . import main_bp
 
-
 @main_bp.route('/')
 @authenticated
-def show():
+def list_projects():
     projects = Projects()
+    return render_template('projects_list.html',
+                           # projects=[],
+                           projects=projects.list(),
+                           auth=session['auth'],
+                           project=projects.project)
 
-    msg =  "ciao {}\n".format(session['auth']['user_id'])
-    for project in projects.list():
-        msg += "Project {}\n".format(project.name)
-    return msg
+@main_bp.route('project/<project_id>/active')
+@authenticated
+def set_active_project(project_id):
+    authenticate_with_token(project_id=project_id)
+    return redirect('/')
+
+@main_bp.route('project/<project_id>')
+@authenticated
+def show_project(project_id):
+    project = None
+    data = {
+        'users': {},
+        'auth': session['auth'],
+        'project': None,
+    }
+    try:
+        project = Project(project_id)
+        data['project'] =  project.project
+    except InsufficientAuthorization:
+        # Try again switching to this project
+        try:
+            authenticate_with_token(project_id=project_id)
+            project = Project(project_id)
+            data['project'] = project.project
+        except InsufficientAuthorization:
+            data['error'] = 'Unauthorized: unable to get info on project %s' % project_id
+    try:
+        if project:
+            data['users'] = project.members()
+    except InsufficientAuthorization:
+        pass
+        # data['error'] = 'Insufficient authorization: unable to list project members'
+
+    return render_template('project.html', **data)

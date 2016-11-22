@@ -1,0 +1,51 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Show project {{project.name}}{% endblock title %}
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      {% if error %}
+      <div class="bs-callout bs-callout-danger">
+        <h4>ERROR</h4>
+        {{error}}
+      </div>
+      {% endif %}
+      <h1>Info on project {{project.name}}</h1>
+      <dl>
+        <dt>Id</dt>
+        <dd>{{project.id}}</dd>
+        <dt>Owner</dt>
+        <dd>{{project.Owner}}</dd>
+        <dt>Contact</dt>
+        <dd>{{project.contact}}</dd>
+        <dt>S3IT Owner</dt>
+        <dd>{{project.s3it_owner}}</dd>
+      </dl>    
+      
+      <h1>Users in project {{project.name}}</h1>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user,role in users.items() %}
+          <tr>
+            <td>
+              {{ user }}
+            </td>
+            <td>
+              {{ role }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock body %}

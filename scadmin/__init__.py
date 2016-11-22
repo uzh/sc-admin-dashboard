@@ -23,10 +23,13 @@ __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
 from flask import Flask, render_template, redirect, url_for
+from flask_bootstrap import Bootstrap
+
 from scadmin.views import main_bp
 from scadmin.auth import login_bp
 
 app = Flask(__name__)
+Bootstrap(app)
 
 app.config.from_object('scadmin.config')
 

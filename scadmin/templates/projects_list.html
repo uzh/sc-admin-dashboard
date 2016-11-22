@@ -1,0 +1,56 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}List of projects{% endblock title %}
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+<div class="col-md-10 col-md-offset-1">
+<h1>List of projects</h1>
+
+User: {{auth.user_id}}
+<br />
+
+project: {{project.name}}
+<br />
+
+project domain: {{auth.project_domain_id}}
+<br />
+
+roles: {{session.roles}}
+<br />
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Project</th>
+      <th>Owner</th>
+      <th>Technical contact</th>
+      <th>S3IT contact person</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for project in projects %}
+    <tr>
+      <td>
+        <a href="/project/{{project.id}}">{{ project.name }}</a>
+      </td>
+      <td>
+        {{ project.owner }}
+      </td>
+      <td>
+        {{ project.contact }}
+      </td>
+      <td>
+        {{ project.s3it_owner }}
+      </td>
+      <td>
+        <a href="/project/{{project.id}}/active">set active</a>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+{% endblock body %}
