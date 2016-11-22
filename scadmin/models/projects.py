@@ -22,13 +22,20 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import Flask, render_template, redirect, url_for
-from scadmin.views import main_bp
-from scadmin.auth import login_bp
+from flask import session
 
-app = Flask(__name__)
+from scadmin.auth import get_session
 
-app.config.from_object('scadmin.config')
+from keystoneclient.v3 import client as keystone_client
 
-app.register_blueprint(main_bp, url_prefix='/')
-app.register_blueprint(login_bp, url_prefix='/auth')
+
+class Projects:
+    def __init__(self):
+        self.session = get_session(session['auth'])
+        self.keystone = keystone_client.Client(session=self.session)
+
+    def list(self):
+        try:
+            return self.keystone.projects.list()
+        except:
+            return self.keystone.projects.list(user=self.session.get_user_id())

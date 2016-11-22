@@ -1,0 +1,2 @@
+graft scadmin/templates
+graft scadmin/static

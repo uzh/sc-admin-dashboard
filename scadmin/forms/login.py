@@ -22,13 +22,10 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import Flask, render_template, redirect, url_for
-from scadmin.views import main_bp
-from scadmin.auth import login_bp
+from wtforms import Form, StringField, PasswordField, validators
 
-app = Flask(__name__)
-
-app.config.from_object('scadmin.config')
-
-app.register_blueprint(main_bp, url_prefix='/')
-app.register_blueprint(login_bp, url_prefix='/auth')
+class LoginForm(Form):
+    username = StringField('Username', [validators.Length(min=4, max=25)])
+    password = PasswordField('Password', [
+        validators.DataRequired(),
+        validators.Length(min=6)])

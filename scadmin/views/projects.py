@@ -22,13 +22,20 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import Flask, render_template, redirect, url_for
-from scadmin.views import main_bp
-from scadmin.auth import login_bp
+from flask import session, request
 
-app = Flask(__name__)
+from scadmin.auth import authenticated
+from scadmin.models.projects import Projects
 
-app.config.from_object('scadmin.config')
+from . import main_bp
 
-app.register_blueprint(main_bp, url_prefix='/')
-app.register_blueprint(login_bp, url_prefix='/auth')
+
+@main_bp.route('/')
+@authenticated
+def show():
+    projects = Projects()
+
+    msg =  "ciao {}\n".format(session['auth']['user_id'])
+    for project in projects.list():
+        msg += "Project {}\n".format(project.name)
+    return msg

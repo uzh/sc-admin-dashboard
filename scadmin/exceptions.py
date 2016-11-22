@@ -22,13 +22,26 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import Flask, render_template, redirect, url_for
-from scadmin.views import main_bp
-from scadmin.auth import login_bp
 
-app = Flask(__name__)
+class InvalidUsage(Exception):
+    status_code = 400
 
-app.config.from_object('scadmin.config')
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
 
-app.register_blueprint(main_bp, url_prefix='/')
-app.register_blueprint(login_bp, url_prefix='/auth')
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+class AuthenticationRequired(InvalidUsage):
+    status_code = 403
+    
+    def __init__(self):
+        InvalidUsage.__init__(self, 
+                              message='Authorization header is expected', 
+                              payload={'code': 'authorization_required'})
