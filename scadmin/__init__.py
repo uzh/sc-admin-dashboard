@@ -22,7 +22,7 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, session
 from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 import flask_nav.elements as nave
@@ -31,10 +31,23 @@ from scadmin.views import main_bp
 from scadmin.auth import login_bp
 
 # Navigation
+class UserElement(nave.Text):
+    def __init__(self):
+        pass
+
+    @property
+    def text(self):
+        return 'Username: {}'.format(
+            session['auth']['user_id'],
+        )
+    
+
 nav = Nav()
+
 nav.register_element('top', nave.Navbar(
-    nave.View('SC dashboard', 'main.list_projects'),
-    nave.View('Logout', 'auth.logout'),
+    nave.View('Project List', 'main.list_projects'),
+    UserElement(),
+    nave.View('Logout', 'auth.logout'), 
 ))
 
 
