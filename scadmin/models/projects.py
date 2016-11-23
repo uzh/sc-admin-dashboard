@@ -66,6 +66,8 @@ class Projects:
         self.session = get_session()
         self.keystone = keystone_client.Client(session=self.session)
         self.project = Project(self.session.auth.project_id).project
+        self.id = self.project.id
+        self.name = self.project.name
 
     def list(self):
         try:

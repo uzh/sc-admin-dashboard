@@ -24,12 +24,23 @@ __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
 from flask import Flask, render_template, redirect, url_for
 from flask_bootstrap import Bootstrap
+from flask_nav import Nav
+import flask_nav.elements as nave
 
 from scadmin.views import main_bp
 from scadmin.auth import login_bp
 
+# Navigation
+nav = Nav()
+nav.register_element('top', nave.Navbar(
+    nave.View('SC dashboard', 'main.list_projects'),
+    nave.View('Logout', 'auth.logout'),
+))
+
+
 app = Flask(__name__)
 Bootstrap(app)
+nav.init_app(app)
 
 app.config.from_object('scadmin.config')
 

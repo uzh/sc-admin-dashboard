@@ -1,0 +1,33 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block styles %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" media="screen">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css" type="text/css" media="screen">
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+      $('#projects').DataTable({
+      "paging": true,
+      "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+      "order": [[1, 'desc'], [3, 'desc']]});
+      } );
+      </script>
+{% endblock styles %}
+
+{% block body %}
+{% block navbar %}
+{{nav.top.render()}}
+{%- endblock navbar %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+    {% block maincontent %}
+    {% endblock maincontent %}
+    </div>
+  </div>
+</div>
+{% endblock body %}

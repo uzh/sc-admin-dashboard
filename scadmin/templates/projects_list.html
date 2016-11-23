@@ -1,11 +1,7 @@
-{% extends "bootstrap/base.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
+{% extends "_base.html" %}
 
 {% block title %}List of projects{% endblock title %}
-{% block body %}
-<div class="container-fluid">
-  <div class="row">
-<div class="col-md-10 col-md-offset-1">
+{% block maincontent %}
 <h1>List of projects</h1>
 
 User: {{auth.user_id}}
@@ -19,29 +15,29 @@ project domain: {{auth.project_domain_id}}
 
 roles: {{session.roles}}
 <br />
-<table class="table table-striped">
+<table  id="projects" class="table table-striped table-bordered table-striped datatable tablesorter tablesorter-default">
   <thead>
-    <tr>
-      <th>Project</th>
-      <th>Owner</th>
-      <th>Technical contact</th>
-      <th>S3IT contact person</th>
+    <tr class="table_caption">
+      <th class="sortable normal_column tablesorter-header">Project</th>
+      <th class="sortable normal_column tablesorter-header">Owner</th>
+      <th class="sortable normal_column tablesorter-header">Technical contact</th>
+      <th class="sortable normal_column tablesorter-header">S3IT contact person</th>
       <th></th>
     </tr>
   </thead>
   <tbody>
     {% for project in projects %}
     <tr>
-      <td>
+      <td class="sortable normal_column">
         <a href="/project/{{project.id}}">{{ project.name }}</a>
       </td>
-      <td>
+      <td class="sortable normal_column">
         {{ project.owner }}
       </td>
-      <td>
+      <td class="sortable normal_column">
         {{ project.contact }}
       </td>
-      <td>
+      <td class="sortable normal_column">
         {{ project.s3it_owner }}
       </td>
       <td>
@@ -50,7 +46,4 @@ roles: {{session.roles}}
     {% endfor %}
   </tbody>
 </table>
-</div>
-</div>
-</div>
-{% endblock body %}
+{% endblock maincontent %}

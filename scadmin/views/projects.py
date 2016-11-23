@@ -56,14 +56,12 @@ def show_project(project_id):
         'project': None,
     }
     try:
-        project = Project(project_id)
-        data['project'] =  project.project
+        data['project'] =  Project(project_id)
     except InsufficientAuthorization:
-        # Try again switching to this project
         try:
+            # Try again switching to the specified project
             authenticate_with_token(project_id=project_id)
-            project = Project(project_id)
-            data['project'] = project.project
+            data['project'] = Project(project_id)
         except InsufficientAuthorization:
             data['error'] = 'Unauthorized: unable to get info on project %s' % project_id
     try:
@@ -71,6 +69,5 @@ def show_project(project_id):
             data['users'] = project.members()
     except InsufficientAuthorization:
         pass
-        # data['error'] = 'Insufficient authorization: unable to list project members'
 
     return render_template('project.html', **data)

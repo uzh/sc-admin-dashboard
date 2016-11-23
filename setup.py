@@ -9,6 +9,7 @@ setup(
         'wtforms',
         'Flask-Wtf',
         'Flask-Bootstrap',
+        'Flask-Nav',
         'python-keystoneclient',
     ],
 )
