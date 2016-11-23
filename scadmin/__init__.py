@@ -37,8 +37,9 @@ class UserElement(nave.Text):
 
     @property
     def text(self):
-        return 'Username: {}'.format(
+        return 'Username: {}, current project: {}'.format(
             session['auth']['user_id'],
+            session['auth']['project_name'],
         )
     
 

@@ -54,7 +54,7 @@ class Project:
             assignments = self.keystone.role_assignments.list(project=self.project.id)
         except Forbidden:
             raise InsufficientAuthorization
-        
+
         return {a.user['id']: roles[a.role['id']] for a in assignments}
 
     def add_suer(self, userid):

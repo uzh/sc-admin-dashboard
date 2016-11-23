@@ -4,16 +4,8 @@
 {% block maincontent %}
 <h1>List of projects</h1>
 
-User: {{auth.user_id}}
-<br />
 
-project: {{project.name}}
-<br />
-
-project domain: {{auth.project_domain_id}}
-<br />
-
-roles: {{session.roles}}
+My roles: {{session.roles}}
 <br />
 <table  id="projects" class="table table-striped table-bordered table-striped datatable tablesorter tablesorter-default">
   <thead>

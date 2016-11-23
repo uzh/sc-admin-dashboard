@@ -32,7 +32,7 @@ from scadmin import config
 
 from keystoneauth1.identity import v3
 from keystoneauth1 import session as ksession
-from keystoneauth1.exceptions.http import Unauthorized
+from keystoneauth1.exceptions.http import Unauthorized, Forbidden
 from keystoneclient.v3 import client as keystone_client
 
 
@@ -45,6 +45,15 @@ def fill_session_data(sess):
     auth['project_id'] = sess.auth.project_id
     auth['project_domain_id'] = sess.auth.project_domain_id
     auth['roles'] = sess.auth.auth_ref.role_names
+    keystone = keystone_client.Client(session=sess)
+    try:
+        project = keystone.projects.get(sess.auth.project_id)
+    except Forbidden:
+        projects = keystone.projects.list(user=sess.get_user_id())
+        for project in projects:
+            if project.id == sess.auth.project_id:
+                break
+    auth['project_name'] = project.name
     session['auth'] = auth
 
 def authenticate_with_password(username, password):
@@ -73,10 +82,10 @@ def authenticate_with_password(username, password):
 def get_session(project_id=None, project_domain_id=None):
     if not project_id:
         project_id = session['auth']['project_id']
-        
+
     if not project_domain_id:
         project_domain_id = 'default'
-    
+
     auth = v3.Token(
         auth_url=config.os_auth_url,
         token=session['auth']['token'],
@@ -85,7 +94,7 @@ def get_session(project_id=None, project_domain_id=None):
     )
     sess = ksession.Session(auth=auth)
     return sess
-    
+
 def authenticate_with_token(project_id=None, project_domain_id='default'):
     sess = get_session(project_id, project_domain_id)
     fill_session_data(sess)
@@ -116,7 +125,7 @@ def login():
         authenticate_with_password(form.username.data, form.password.data)
         return redirect('/')
     return render_template('auth/login.html', form=form)
-                        
+
 @login_bp.route('/logout')
 def logout():
     if 'auth' in session:
