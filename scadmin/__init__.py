@@ -41,16 +41,29 @@ class UserElement(nave.Text):
             session['auth']['user_id'],
             session['auth']['project_name'],
         )
-    
+
+class ProjectCreation(nave.View):
+    def __init__(self):
+        pass
+
+    def get_url(self):
+        return url_for('main.create_project')
+
+    @property
+    def text(self):
+        return "Create Project"
+
 
 nav = Nav()
 
-nav.register_element('top', nave.Navbar(
-    nave.View('Project List', 'main.list_projects'),
-    UserElement(),
-    nave.View('Logout', 'auth.logout'), 
-))
+def top_nav():
+    elements = [nave.View('Project List', 'main.list_projects')]
+    if 'admin' in session['auth']['roles']:
+        elements.append(ProjectCreation())
+    elements += [UserElement(), nave.View('Logout', 'auth.logout')]
+    return nave.Navbar(*elements)
 
+nav.register_element('top', top_nav)
 
 app = Flask(__name__)
 Bootstrap(app)

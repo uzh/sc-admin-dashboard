@@ -44,7 +44,6 @@ def fill_session_data(sess):
     auth['user_id'] = sess.get_user_id()
     auth['project_id'] = sess.auth.project_id
     auth['project_domain_id'] = sess.auth.project_domain_id
-    auth['roles'] = sess.auth.auth_ref.role_names
     keystone = keystone_client.Client(session=sess)
     try:
         project = keystone.projects.get(sess.auth.project_id)
@@ -54,6 +53,7 @@ def fill_session_data(sess):
             if project.id == sess.auth.project_id:
                 break
     auth['project_name'] = project.name
+    auth['roles'] = sess.auth.auth_ref.role_names
     session['auth'] = auth
 
 def authenticate_with_password(username, password):
