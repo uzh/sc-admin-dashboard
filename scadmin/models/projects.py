@@ -23,6 +23,7 @@ __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
 from flask import session
+from collections import defaultdict
 
 from scadmin.auth import get_session
 from scadmin.exceptions import InsufficientAuthorization
@@ -71,11 +72,18 @@ class Project:
         except Forbidden:
             raise InsufficientAuthorization
 
-        return {a.user['id']: roles[a.role['id']] for a in assignments}
+        users = defaultdict(list)
+        for a in assignments:
+            users[a.user['id']].append(roles[a.role['id']])
+        return users
 
-    def add_user(self, username):
-        pass
+    def grant(self, username, rolename):
+        role = self.keystone.roles.find(name=rolename)
+        self.keystone.roles.grant(role, user=username, project=self.project)
 
+    def revoke(self, username, rolename):
+        role = self.keystone.roles.find(name=rolename)
+        self.keystone.roles.revoke(role, user=username, project=self.project)
 
 class Projects:
     def __init__(self):

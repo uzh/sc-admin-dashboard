@@ -33,7 +33,7 @@ My roles: {{auth.roles}}
         {{ project.p.s3it_owner }}
       </td>
       <td>
-        {% if project.roles %}<a href="/project/{{project.id}}/active">set active</a> {% endif %}
+        {% if project.roles %}<a href="/project/{{project.p.id}}/active">set active</a> {% endif %}
     </tr>
     {% endfor %}
   </tbody>

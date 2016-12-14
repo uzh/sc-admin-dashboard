@@ -12,7 +12,7 @@
 <table class="table">
   <tbody>
     <tr>
-      <th>id</th><td>{{project.id}}</td>
+      <th>id</th><td>{{project_id}}</td>
     </tr>
     <tr>
       <th>Description</th><td>{{project.description|replace('\n', '<br />')|safe}}</td>
@@ -45,10 +45,12 @@
     <tr>
       <th>User</th>
       <th>Role</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
-    {% for user,role in users.items() %}
+    {% for user,roles in users.items() %}
+      {% for role in roles %}
     <tr>
       <td>
         {{ user }}
@@ -56,8 +58,14 @@
       <td>
         {{ role }}
       </td>
+      <td>
+        <a href="{{project_id}}/revoke?userid={{user}}&role={{role}}">revoke</a>
+      </td>
     </tr>
+    {% endfor %}
     {% endfor %}
   </tbody>
 </table>
+
+{{ wtf.quick_form(form)}}
 {% endblock maincontent %}

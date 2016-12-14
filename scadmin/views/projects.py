@@ -24,12 +24,17 @@ __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
 from flask import session, request, render_template, redirect
 
+from flask.json import jsonify
+
 from scadmin.auth import authenticated, authenticate_with_token
 from scadmin.models.projects import Projects, Project
+from scadmin.models.users import Users
 from scadmin.exceptions import InsufficientAuthorization
 from scadmin.forms.create_project import CreateProjectForm
+from scadmin.forms.adduser import AddUserForm
 
 from . import main_bp
+
 
 @main_bp.route('/')
 @authenticated
@@ -59,14 +64,18 @@ def create_project():
     return render_template('create-project.html', form=form)
     
 
-@main_bp.route('project/<project_id>')
+@main_bp.route('project/<project_id>', methods=['GET', 'POST'])
 @authenticated
 def show_project(project_id):
+    form = AddUserForm(request.form)
     data = {
         'users': {},
         'auth': session['auth'],
         'project': None,
+        'project_id': project_id,
+        'form': form
     }
+
     try:
         data['project'] =  Project(project_id)
     except InsufficientAuthorization:
@@ -76,6 +85,14 @@ def show_project(project_id):
             data['project'] = Project(project_id)
         except InsufficientAuthorization:
             data['error'] = 'Unauthorized: unable to get info on project %s' % project_id
+
+    if request.method == 'POST' and form.validate():
+        users = Users()
+        user = users.get(form.uid.data)
+        data['project'].grant(form.uid.data, form.role.data)
+
+        data['message'] = 'User %s added to project'
+
     try:
         if data['project']:
             data['users'] = data['project'].members()
@@ -83,3 +100,29 @@ def show_project(project_id):
         pass
 
     return render_template('project.html', **data)
+
+@main_bp.route('project/<project_id>/revoke')
+@authenticated
+def revoke_grant(project_id):
+    uid = request.args.get('userid')
+    role = request.args.get('role')
+    project = Project(project_id)
+    project.revoke(uid, role)
+    return redirect('project/%s' % project_id)
+    
+@main_bp.route('user')
+@authenticated
+def search_user():
+    users = Users()
+    uid = request.args.get('search')
+    if uid:
+        return jsonify(users.search(uid))
+    else:
+        return jsonify(users.list())
+
+@main_bp.route('user/<uid>')
+@authenticated
+def get_user(uid):
+    users = Users()
+    user = users.get(uid)
+    return jsonify(user)
