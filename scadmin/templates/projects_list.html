@@ -20,6 +20,9 @@
       <th class="sortable normal_column tablesorter-header">Owner</th>
       <th class="sortable normal_column tablesorter-header">Technical contact</th>
       <th class="sortable normal_column tablesorter-header">S3IT contact person</th>
+      {% if 'usermanager' in auth.roles or 'admin' in auth.roles %}
+      <th></th>
+      {% endif %}
       <th></th>
     </tr>
   </thead>
@@ -38,8 +41,16 @@
       <td class="sortable normal_column">
         {{ project.p.s3it_owner }}
       </td>
+      {% if 'usermanager' in auth.roles or 'admin' in auth.roles %}
       <td>
-        {% if project.myroles and project.p.name != auth.project_name %}<a href="/project/{{project.p.id}}/active">set active</a> {% endif %}
+        <a href="/quota/{{project.p.id}}">set quota</a>
+      </td>
+      {% endif %}
+      <td>
+        {% if project.myroles and project.p.name != auth.project_name %}
+        <a href="/project/{{project.p.id}}/active">set active</a>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
   </tbody>

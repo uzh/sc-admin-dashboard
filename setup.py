@@ -11,5 +11,6 @@ setup(
         'Flask-Bootstrap',
         'Flask-Nav',
         'python-keystoneclient',
+        'python-novaclient',
     ],
 )

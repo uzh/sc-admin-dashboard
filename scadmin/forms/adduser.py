@@ -25,7 +25,6 @@ __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 from wtforms import Form, StringField, SelectField, SubmitField, validators
 from flask_wtf import FlaskForm
 from scadmin import config
-from scadmin.forms.project import ProjectData
 
 
 class AddUserForm(FlaskForm):
@@ -42,5 +41,3 @@ class AddUserForm(FlaskForm):
         ],
     )
     submit = SubmitField('Add role to user')
-
-    

@@ -32,6 +32,7 @@ from scadmin import config
 from keystoneclient.v3 import client as keystone_client
 from keystoneauth1.exceptions.http import Forbidden
 
+from novaclient.client import Client as nova_client
 
 
 class Project:
@@ -85,6 +86,16 @@ class Project:
         role = self.keystone.roles.find(name=rolename)
         self.keystone.roles.revoke(role, user=username, project=self.project)
 
+    def get_quota(self, project_id):
+        nova = nova_client('2', session=self.session)
+        quota = {}
+        nquota = nova.quotas.get(project_id)
+        quota['c_cores'] = nquota.cores
+        quota['c_instances'] = nquota.instances
+
+        return quota
+        
+        
 class Projects:
     def __init__(self):
         self.session = get_session()

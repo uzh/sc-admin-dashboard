@@ -25,13 +25,16 @@ __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 from flask import session, request, render_template, redirect
 
 from flask.json import jsonify
+from  werkzeug.datastructures import MultiDict
 
 from scadmin.auth import authenticated, authenticate_with_token
 from scadmin.models.projects import Projects, Project
 from scadmin.models.users import Users
+from scadmin.models.quota import Quota
 from scadmin.exceptions import InsufficientAuthorization
 from scadmin.forms.create_project import CreateProjectForm
 from scadmin.forms.adduser import AddUserForm
+from scadmin.forms.quotas import SetQuotaForm
 
 from . import main_bp
 
@@ -109,7 +112,29 @@ def revoke_grant(project_id):
     project = Project(project_id)
     project.revoke(uid, role)
     return redirect('project/%s' % project_id)
-    
+
+@main_bp.route('quota/<project_id>', methods=['GET', 'POST'])
+@authenticated
+def quota(project_id):
+    quota = Quota(project_id)
+    project = Project(project_id)
+    error = None
+    if request.method == 'POST':
+        form = SetQuotaForm(request.form)
+        if form.validate():
+            # Update quota
+            try:
+                updated = quota.set(form.data)
+            except Exception as ex:
+                error = "Error while updating quota: %s" % ex
+            # set some message
+            quota = Quota(project_id)
+    else:
+        form = SetQuotaForm(MultiDict(quota.to_dict()))
+        
+
+    return render_template('quota.html', project=project, form=form, error=error)
+
 @main_bp.route('user')
 @authenticated
 def search_user():
@@ -126,3 +151,4 @@ def get_user(uid):
     users = Users()
     user = users.get(uid)
     return jsonify(user)
+

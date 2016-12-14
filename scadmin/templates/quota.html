@@ -1,0 +1,22 @@
+{% extends "_base.html" %}
+
+{% block title %}Quota for project {{project.name}}{% endblock title %}
+{% block maincontent %}
+{% if error %}
+<div class="bs-callout bs-callout-danger">
+  <h4>ERROR</h4>
+  {{error}}
+</div>
+{% endif %}
+
+<h1>Quota for project {{project.name}}</h1>
+
+Current roles:
+<ul>
+  {% for role in auth.roles %}
+  <li>{{role}}</li>
+  {% endfor %}
+</ul>
+
+{{ wtf.quick_form(form)}}
+{% endblock maincontent %}
