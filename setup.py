@@ -12,5 +12,8 @@ setup(
         'Flask-Nav',
         'python-keystoneclient',
         'python-novaclient',
+        'python-cinderclient',
+        'python-neutronclient',
+        'python-swiftclient',
     ],
 )
