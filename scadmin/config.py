@@ -45,5 +45,14 @@ CSRF_SESSION_KEY = "secret"
 # Secret key for signing cookies
 SECRET_KEY = "secret"
 
-os_auth_url='https://cloud.s3it.uzh.ch:5000/v3'
+os_auth_url='https://cloud-test.s3it.uzh.ch:5000/v3'
 os_user_domain_name='default'
+
+valid_faculties = [
+    ('N/A', 'none'),
+    ('MED', 'Medicine'),
+    ('MNF', 'Science'),
+    ('OEC', 'Business, Economics and Informatics'),
+    ('PHIL', 'Arts and Social Sciences'),
+    ('VET', 'Vetsuisse'),
+]

@@ -27,6 +27,7 @@ from flask import session, request, render_template, redirect
 from scadmin.auth import authenticated, authenticate_with_token
 from scadmin.models.projects import Projects, Project
 from scadmin.exceptions import InsufficientAuthorization
+from scadmin.forms.create_project import CreateProjectForm
 
 from . import main_bp
 
@@ -49,12 +50,18 @@ def set_active_project(project_id):
 @main_bp.route('create-project', methods=['GET', 'POST'])
 @authenticated
 def create_project():
-    return redirect('/')
+    form = CreateProjectForm(request.form)
+    if request.method == 'POST' and form.validate():
+        # create project
+        projects = Projects()
+        project = projects.create(form)
+        return redirect('project/%s' % project.id)
+    return render_template('create-project.html', form=form)
+    
 
 @main_bp.route('project/<project_id>')
 @authenticated
 def show_project(project_id):
-    project = None
     data = {
         'users': {},
         'auth': session['auth'],
@@ -70,8 +77,8 @@ def show_project(project_id):
         except InsufficientAuthorization:
             data['error'] = 'Unauthorized: unable to get info on project %s' % project_id
     try:
-        if project:
-            data['users'] = project.members()
+        if data['project']:
+            data['users'] = data['project'].members()
     except InsufficientAuthorization:
         pass
 

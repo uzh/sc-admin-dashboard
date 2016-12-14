@@ -9,16 +9,35 @@
 </div>
 {% endif %}
 <h1>Info on project {{project.name}}</h1>
-<dl>
-  <dt>Id</dt>
-  <dd>{{project.id}}</dd>
-  <dt>Owner</dt>
-  <dd>{{project.Owner}}</dd>
-  <dt>Contact</dt>
-  <dd>{{project.contact}}</dd>
-  <dt>S3IT Owner</dt>
-  <dd>{{project.s3it_owner}}</dd>
-</dl>    
+<table class="table">
+  <tbody>
+    <tr>
+      <th>id</th><td>{{project.id}}</td>
+    </tr>
+    <tr>
+      <th>Description</th><td>{{project.description|replace('\n', '<br />')|safe}}</td>
+    </tr>
+    <tr>
+      <th>Faculty</th><td>{{project.faculty}}</td>
+    </tr>
+    <tr>
+      <th>Institute</th><td>{{project.institute}}</td>
+    </tr>
+    
+    <tr>
+      <th>Owner</th><td><a href="mailto:{{project.owner_email}}">{{project.owner}}</a></td>
+    </tr>
+    <tr>
+      <th>Contact</th><td><a href="mailto:{{project.contact_email}}">{{project.contact}}</a></td>
+    </tr>
+    <tr>
+      <th>S3IT Owner</th><td><a href="mailto:{{project.s3it_owner_email}}">{{project.s3it_owner}}</a></td>
+    </tr>
+    <tr>
+      <th>Quota history</th><td>{{project.quota_history|replace('\n', '<br />')|safe}}</td>
+    </tr>
+  </tbody>
+</table>
 
 <h1>Users in project {{project.name}}</h1>
 <table class="table table-striped">

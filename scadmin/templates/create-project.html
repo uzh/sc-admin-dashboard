@@ -1,0 +1,19 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block body %}
+<div class="container">  
+  <div class="row">
+    <h1 class="text-center">Create Project</h1>
+  </div>
+  <div class="row">
+
+    
+    <div class="col-md-9 col-md-offset-1">
+  {{ wtf.quick_form(form) }}
+    </div>
+  </div>
+</div>
+</div>
+
+{% endblock body %}

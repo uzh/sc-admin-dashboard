@@ -47,7 +47,23 @@ class Project:
             for project in projects:
                 if project.id == self.session.auth.project_id:
                     self.project = project
+            
+        
+    def __getattr__(self, attr):
+        # Some attributes we want to pass them down to self.project
+        if attr in ['owner', 'owner_email',
+                    'contact', 'contact_email',
+                    's3it_owner', 's3it_owner_email',
+                    'quota_history',
+                    'institute',
+                    'faculty',
+                    'description',
+                    'name']:
+            return getattr(self.project, attr)
+        else:
+            return object.__getattr__(self, attr)
 
+                    
     def members(self):
         try:
             roles = {r.id: r.name for r in self.keystone.roles.list()}
@@ -57,7 +73,7 @@ class Project:
 
         return {a.user['id']: roles[a.role['id']] for a in assignments}
 
-    def add_suer(self, userid):
+    def add_user(self, username):
         pass
 
 
@@ -74,3 +90,22 @@ class Projects:
             return self.keystone.projects.list()
         except:
             return self.keystone.projects.list(user=self.session.get_user_id())
+
+    def create(self, form):
+        # WARNING: always creating projects in default domain
+        domain = self.keystone.domains.get('default')
+        project = self.keystone.projects.create(
+            form.name.data,
+            domain,
+            description=form.description.data,
+            owner=form.owner.data,
+            owner_email=form.owner_email.data,
+            contact=form.contact.data,
+            contact_email=form.contact_email.data,
+            s3it_owner=form.s3it_owner.data,
+            s3it_owner_email=form.s3it_owner_email.data,
+            faculty=form.faculty.data,
+            institute=form.institute.data,
+        )
+        return project
+        
