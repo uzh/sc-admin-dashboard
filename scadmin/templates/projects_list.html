@@ -2,11 +2,17 @@
 
 {% block title %}List of projects{% endblock title %}
 {% block maincontent %}
+<h1>Current roles in project <i>{{project.name}}</i>:</h1>
+<ul>
+  {% for role in auth.roles %}
+  <li>{{role}}</li>
+  {% endfor %}
+</ul>
+
+
 <h1>List of projects</h1>
 
 
-My roles: {{auth.roles}}
-<br />
 <table  id="projects" class="table table-striped table-bordered table-striped datatable tablesorter tablesorter-default">
   <thead>
     <tr class="table_caption">
@@ -33,7 +39,7 @@ My roles: {{auth.roles}}
         {{ project.p.s3it_owner }}
       </td>
       <td>
-        {% if project.roles %}<a href="/project/{{project.p.id}}/active">set active</a> {% endif %}
+        {% if project.myroles and project.p.name != auth.project_name %}<a href="/project/{{project.p.id}}/active">set active</a> {% endif %}
     </tr>
     {% endfor %}
   </tbody>

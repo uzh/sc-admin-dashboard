@@ -48,8 +48,8 @@ class Project:
             for project in projects:
                 if project.id == self.session.auth.project_id:
                     self.project = project
-            
-        
+
+
     def __getattr__(self, attr):
         # Some attributes we want to pass them down to self.project
         if attr in ['owner', 'owner_email',
@@ -64,7 +64,7 @@ class Project:
         else:
             return object.__getattr__(self, attr)
 
-                    
+
     def members(self):
         try:
             roles = {r.id: r.name for r in self.keystone.roles.list()}
@@ -97,15 +97,18 @@ class Projects:
         try:
             projects = self.keystone.projects.list()
             roles = self.keystone.role_assignments.list()
+            myroles = self.keystone.role_assignments.list(user=self.session.get_user_id())
         except:
             projects = self.keystone.projects.list(user=self.session.get_user_id())
             roles = self.keystone.role_assignments.list(user=self.session.get_user_id())
+            myroles = roles
         rolenames = {r.id: r.name for r in self.keystone.roles.list()}
         plist = []
         for project in projects:
             plist.append({
                 'p': project,
-                'roles': [rolenames.get(r.role['id']) for r in roles if r.scope['project']['id'] == project.id]
+                'roles': [rolenames.get(r.role['id']) for r in roles if r.scope['project']['id'] == project.id],
+                'myroles': [rolenames.get(r.role['id']) for r in myroles if r.scope['project']['id'] == project.id],
             })
         return plist
 
@@ -126,4 +129,3 @@ class Projects:
             institute=form.institute.data,
         )
         return project
-        
