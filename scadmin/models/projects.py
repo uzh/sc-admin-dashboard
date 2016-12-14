@@ -87,9 +87,19 @@ class Projects:
 
     def list(self):
         try:
-            return self.keystone.projects.list()
+            projects = self.keystone.projects.list()
+            roles = self.keystone.role_assignments.list()
         except:
-            return self.keystone.projects.list(user=self.session.get_user_id())
+            projects = self.keystone.projects.list(user=self.session.get_user_id())
+            roles = self.keystone.role_assignments.list(user=self.session.get_user_id())
+        rolenames = {r.id: r.name for r in self.keystone.roles.list()}
+        plist = []
+        for project in projects:
+            plist.append({
+                'p': project,
+                'roles': [rolenames.get(r.role['id']) for r in roles if r.scope['project']['id'] == project.id]
+            })
+        return plist
 
     def create(self, form):
         # WARNING: always creating projects in default domain

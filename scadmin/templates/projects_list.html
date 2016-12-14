@@ -21,19 +21,19 @@ My roles: {{auth.roles}}
     {% for project in projects %}
     <tr>
       <td class="sortable normal_column">
-        <a href="/project/{{project.id}}">{{ project.name }}</a>
+        <a href="/project/{{project.p.id}}">{{ project.p.name }}</a>
       </td>
       <td class="sortable normal_column">
-        {{ project.owner }}
+        {{ project.p.owner }}
       </td>
       <td class="sortable normal_column">
-        {{ project.contact }}
+        {{ project.p.contact }}
       </td>
       <td class="sortable normal_column">
-        {{ project.s3it_owner }}
+        {{ project.p.s3it_owner }}
       </td>
       <td>
-        <a href="/project/{{project.id}}/active">set active</a>
+        {% if project.roles %}<a href="/project/{{project.id}}/active">set active</a> {% endif %}
     </tr>
     {% endfor %}
   </tbody>

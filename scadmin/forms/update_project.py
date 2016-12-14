@@ -24,15 +24,8 @@ __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
 from wtforms import Form, StringField, SelectField, SubmitField, TextAreaField, validators
 from scadmin import config
-from scadmin.forms.project import ProjectData
 
+from scadmin.forms project import ProjectData
 
 class CreateProjectForm(ProjectData):
-    field_order = ('name', '*')
-    name = StringField(
-        'Project Name',
-        [validators.Length(min=4), validators.DataRequired()]
-    )
-    submit = SubmitField('Create project')
-
-    
+    submit = SubmitField('Update project')
