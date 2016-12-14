@@ -46,7 +46,8 @@ CSRF_SESSION_KEY = "secret"
 SECRET_KEY = "secret"
 
 os_auth_url='https://cloud-test.s3it.uzh.ch:5000/v3'
-os_user_domain_name='default'
+os_user_domain_id='default'
+os_project_domain_id='default'
 
 valid_faculties = [
     ('N/A', 'none'),
@@ -56,3 +57,4 @@ valid_faculties = [
     ('PHIL', 'Arts and Social Sciences'),
     ('VET', 'Vetsuisse'),
 ]
+

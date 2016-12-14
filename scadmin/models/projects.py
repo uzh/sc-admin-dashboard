@@ -26,10 +26,10 @@ from flask import session
 
 from scadmin.auth import get_session
 from scadmin.exceptions import InsufficientAuthorization
+from scadmin import config
 
 from keystoneclient.v3 import client as keystone_client
 from keystoneauth1.exceptions.http import Forbidden
-
 
 
 
@@ -93,7 +93,7 @@ class Projects:
 
     def create(self, form):
         # WARNING: always creating projects in default domain
-        domain = self.keystone.domains.get('default')
+        domain = self.keystone.domains.get(config.os_project_domain_id)
         project = self.keystone.projects.create(
             form.name.data,
             domain,
