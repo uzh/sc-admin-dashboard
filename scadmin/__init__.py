@@ -58,7 +58,8 @@ nav = Nav()
 
 def top_nav():
     elements = [nave.View('Project List', 'main.list_projects')]
-    if 'admin' in session['auth']['roles']:
+    if 'admin' in session['auth']['roles'] or \
+       'usermanager' in session['auth']['roles']:
         elements.append(ProjectCreation())
     elements += [UserElement(), nave.View('Logout', 'auth.logout')]
     return nave.Navbar(*elements)
