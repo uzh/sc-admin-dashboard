@@ -67,7 +67,26 @@
   </tbody>
 </table>
 
-{{ wtf.quick_form(form)}}
+<form action="" method="post" class="form" role="form">
+  {{ form.hidden_tag() }}
+  <h2>Add user to project</h2>
+  <div class="form-group row">
+    <label for="uid" class="col-xs-1 col-form-label">Username</label>
+    <div class="col-xs-3">
+      {{ form.uid(class="form-control") }}
+    </div>
+
+    <label for="role" class="col-xs-1 col-form-label">Role</label>
+    <div class="col-xs-3">
+      {{ form.role(class="form-control") }}
+    </div>
+
+    <div class="col-xs-3">
+      {{form.submit(class="btn btn-default")}}
+    </div>
+
+  </div>    
+</form>
 {% endif %}
 
 {% endblock maincontent %}
