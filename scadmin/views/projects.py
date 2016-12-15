@@ -159,7 +159,7 @@ def quota(project_id):
     else:
         form = SetQuotaForm(MultiDict(quota.to_dict()))
         if not quota.has_swift():
-            del form.s_gigabytes
+            del form.s_bytes
         
 
     return render_template('quota.html',
