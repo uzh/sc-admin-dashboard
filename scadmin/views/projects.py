@@ -124,6 +124,8 @@ def quota(project_id):
 
     if request.method == 'POST':
         form = SetQuotaForm(request.form)
+        if not quota.has_swift():
+            del form.s_gigabytes
         if form.validate():
             # Update quota
             try:
@@ -152,8 +154,12 @@ def quota(project_id):
             # set some message
             quota = Quota(project_id)
             form = SetQuotaForm(MultiDict(quota.to_dict()))
+            if not quota.has_swift():
+                del form.s_gigabytes
     else:
         form = SetQuotaForm(MultiDict(quota.to_dict()))
+        if not quota.has_swift():
+            del form.s_gigabytes
         
 
     return render_template('quota.html',

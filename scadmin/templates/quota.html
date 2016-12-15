@@ -25,5 +25,102 @@ Current roles:
   {% endfor %}
 </ul>
 
-{{ wtf.quick_form(form)}}
+<form action="" method="post" class="form" role="form">
+  {{ form.hidden_tag() }}
+  <h2>Compute (nova)</h2>
+  <div class="form-group row">
+
+    <label for="c_cores" class="col-xs-1 col-form-label">Nr. vCores</label>
+    <div class="col-xs-2">
+      {{ form.c_cores(class="form-control", size=4) }}
+    </div>
+
+    <label for="c_instances" class="col-xs-1 col-form-label">Nr. of instances</label>
+    <div class="col-xs-2">
+      {{ form.c_instances(class="form-control", size=4) }}
+    </div>
+
+    <label for="c_ram" class="col-xs-1 col-form-label">RAM (MB)</label>
+    <div class="col-xs-2">
+      {{ form.c_ram(class="form-control") }}
+    </div>
+  </div>
+
+  <h2>Network (neutron)</h2>
+  <div class="form-group row">
+    <label for="n_port" class="col-xs-1 col-form-label">Nr. of ports</label>  
+    <div class="col-xs-2">
+      {{ form.n_port(class="form-control") }}
+    </div>
+
+    <label for="n_network" class="col-xs-1 col-form-label">Nr. of networks</label>  
+    <div class="col-xs-2">
+      {{ form.n_network(class="form-control") }}
+    </div>
+
+    <label for="n_subnet" class="col-xs-1 col-form-label">Nr. of subnets</label>  
+    <div class="col-xs-2">
+      {{ form.n_subnet(class="form-control") }}
+    </div>
+  </div>
+
+  <!-- neutron, second row -->
+  <div class="form-group row">
+    <label for="n_security_group" class="col-xs-1 col-form-label">Nr. of security groups</label>  
+    <div class="col-xs-2">
+      {{ form.n_security_group(class="form-control") }}
+    </div>
+
+    <label for="n_floatingip" class="col-xs-1 col-form-label">Nr. of Floating IPs</label>  
+    <div class="col-xs-2">
+      {{ form.n_floatingip(class="form-control") }}
+    </div>
+
+    <label for="n_router" class="col-xs-1 col-form-label">Nr. of routers</label>  
+    <div class="col-xs-2">
+      {{ form.n_router(class="form-control") }}
+    </div>
+  </div>
+  
+
+  <h2>Block Storage (cinder)</h2>
+  <div class="form-group row">
+    <label for="v_volumes" class="col-xs-1 col-form-label">Nr. of volumes</label>  
+    <div class="col-xs-2">
+      {{ form.v_volumes(class="form-control") }}
+    </div>
+
+    <label for="v_gigabytes" class="col-xs-1 col-form-label">Gigabytes</label>  
+    <div class="col-xs-2">
+      {{ form.v_gigabytes(class="form-control") }}
+    </div>
+    
+
+  </div>
+
+  {% if form.s_gigabytes %}
+  <h2>Object Storage (swift)</h2>
+  <div class="form-group row">
+    <label for="s_gigabytes" class="col-xs-1 col-form-label">Gigabytes</label>  
+    <div class="col-xs-2">
+      {{ form.s_gigabytes(class="form-control") }}
+    </div>
+  </div>
+  {% endif %}
+
+  <h2>Commit log</h2>
+  <div class="form-group row">
+    <div class="col-xs-10">
+      {{form.comment(class="form-control")}}
+    </div>
+  </div>
+  
+  <div class="form-group row">
+    <div class="col-xs-10">
+      {{form.submit(class="btn btn-default")}}
+    </div>
+  </div>
+</form>
+</div>
+
 {% endblock maincontent %}
