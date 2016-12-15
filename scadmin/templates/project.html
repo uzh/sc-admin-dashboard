@@ -40,11 +40,11 @@
 
 {% if users is defined %}
 <h1>Users in project {{project.name}}</h1>
-<table class="table table-striped">
+<table id="user-list" class="table table-striped datatable tablesorter tablesorter-default">
   <thead>
-    <tr>
-      <th>User</th>
-      <th>Role</th>
+    <tr class="table_caption">
+      <th class="sortable normal_column tablesorter-header">User</th>
+      <th class="sortable normal_column tablesorter-header">Role</th>
       <th></th>
     </tr>
   </thead>
@@ -52,10 +52,10 @@
     {% for user,roles in users.items() %}
       {% for role in roles %}
     <tr>
-      <td>
+      <td class="sortable normal_column">
         {{ user }}
       </td>
-      <td>
+      <td class="sortable normal_column">
         {{ role }}
       </td>
       <td>

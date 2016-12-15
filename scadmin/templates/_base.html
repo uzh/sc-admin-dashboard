@@ -9,13 +9,16 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
     <script type="text/javascript">
-      $(document).ready(function() {
-          $('#projects').DataTable({
-              "paging": true,
-              "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
-              "order": [[0, 'asc']]}
-      );
-      } );
+    $(document).ready(function() {
+        $('#projects').DataTable({
+            "paging": true,
+            "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "order": [[0, 'asc']]});
+        $('#user-list').DataTable({
+            "paging": true,
+            "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+            "order": [[0, 'asc']]});
+    } );
       </script>
 {% endblock styles %}
 
