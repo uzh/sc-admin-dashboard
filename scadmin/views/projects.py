@@ -22,8 +22,9 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import session, request, render_template, redirect
+from datetime import datetime
 
+from flask import session, request, render_template, redirect, current_app as app
 from flask.json import jsonify
 from  werkzeug.datastructures import MultiDict
 
@@ -118,22 +119,49 @@ def revoke_grant(project_id):
 def quota(project_id):
     quota = Quota(project_id)
     project = Project(project_id)
-    error = None
+    error = ''
+    msg = None
+
     if request.method == 'POST':
         form = SetQuotaForm(request.form)
         if form.validate():
             # Update quota
             try:
                 updated = quota.set(form.data)
+                # Build updated message.
+                msg = []
+                for qtype, qvalue in updated.items():
+                    for key, values in qvalue.items():
+                        msg.append("%s: Update %s %d -> %d" % (
+                            qtype.upper(), key, values[0], values[1]))
             except Exception as ex:
-                error = "Error while updating quota: %s" % ex
+                error += "Error while updating quota: %s\n" % ex
+
+            try:
+                # Update project
+                curdate = datetime.now().strftime('(%Y-%d-%m)')
+                history = ["%s %s updated quota" % (curdate, session['auth']['user_id'])]
+                if form.comment.data:
+                    history.append("%s %s" % (curdate, form.comment.data))
+                history.extend(["%s %s" % (curdate, line) for line in msg])
+                project.add_to_history(str.join('\n', history))
+            except Exception as ex:
+                app.logger.error("Error while updating history of project %s: %s",
+                                  project.name, ex)
+                error += 'Error while updating history: %s\n' % ex
             # set some message
             quota = Quota(project_id)
+            form = SetQuotaForm(MultiDict(quota.to_dict()))
     else:
         form = SetQuotaForm(MultiDict(quota.to_dict()))
         
 
-    return render_template('quota.html', project=project, form=form, error=error)
+    return render_template('quota.html',
+                           project=project,
+                           form=form,
+                           error=error,
+                           messages=msg,
+                           auth=session['auth'])
 
 @main_bp.route('user')
 @authenticated

@@ -3,9 +3,16 @@
 {% block title %}Quota for project {{project.name}}{% endblock title %}
 {% block maincontent %}
 {% if error %}
-<div class="bs-callout bs-callout-danger">
-  <h4>ERROR</h4>
+<div class="alert alert-danger">
   {{error}}
+</div>
+{% endif %}
+
+{% if messages %}
+<div class="alert alert-info">
+  {% for msg in messages %}
+  <p>{{msg}}</p>
+  {% endfor %}
 </div>
 {% endif %}
 

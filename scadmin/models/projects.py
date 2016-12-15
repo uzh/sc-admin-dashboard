@@ -86,15 +86,13 @@ class Project:
         role = self.keystone.roles.find(name=rolename)
         self.keystone.roles.revoke(role, user=username, project=self.project)
 
-    def get_quota(self, project_id):
-        nova = nova_client('2', session=self.session)
-        quota = {}
-        nquota = nova.quotas.get(project_id)
-        quota['c_cores'] = nquota.cores
-        quota['c_instances'] = nquota.instances
-
-        return quota
-        
+    def add_to_history(self, history):
+        try:
+            oldprop = self.project.quota_history
+            self.keystone.projects.update(self.project, quota_history=oldprop.strip() + '\n' + history)
+        except AttributeError:
+            app.logger.info("quota_history property not present in project %s", self.project.name)
+            self.keystone.projects.update(self.project, quota_history=history)
         
 class Projects:
     def __init__(self):

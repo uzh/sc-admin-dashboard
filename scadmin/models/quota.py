@@ -28,6 +28,7 @@ from collections import defaultdict
 from scadmin.auth import get_session
 from scadmin.exceptions import InsufficientAuthorization
 from scadmin import config
+from flask import current_app as app
 
 from novaclient.client import Client as nova_client
 from cinderclient import client as cinder_client
@@ -47,7 +48,7 @@ class Quota:
             'nova': { },
             'neutron': {},
             'cinder': {},
-            'swift': {},
+            'swift': {'gigabytes': 0},
         }
 
         # Get nova quota
@@ -67,7 +68,6 @@ class Quota:
         # Get neutron quota
         quota = self.neutron.show_quota(project_id)['quota']
         self.quota['neutron'].update(quota)
-
 
     def to_dict(self):
         toret = {}
@@ -106,21 +106,35 @@ class Quota:
     def set(self, quota):
         """Update quota for project"""
         toupdate = self.from_dict(quota)
-
+        updated = {}
+        
         # Check if we need to update nova quota
-        for key, value in toupdate['nova'].items():
+        for key, value in list(toupdate['nova'].items()):
             if value == self.quota['nova'][key]:
                 del toupdate['nova'][key]
         self.nova.quotas.update(self.project_id, **toupdate['nova'])
-
-        for key, value in toupdate['cinder'].items():
+        
+        for key, value in list(toupdate['cinder'].items()):
             if value == self.quota['cinder'][key]:
                 del toupdate['cinder'][key]
         self.cinder.quotas.update(self.project_id, **toupdate['cinder'])
 
-        for key, value in toupdate['neutron'].items():
+        for key, value in list(toupdate['neutron'].items()):
             if value == self.quota['neutron'][key]:
                 del toupdate['neutron'][key]
         self.neutron.update_quota(self.project_id, {'quota': toupdate['neutron']})
+
+        updated = {}
+        for qtype in ['nova', 'cinder', 'neutron', 'swift']:
+            updated[qtype] = {}
+            for key, value in toupdate[qtype].items():
+                try:
+                    updated[qtype][key] = (self.quota[qtype][key], value)
+                except KeyError:
+                    app.logger.error("Ignoring error while updating quota for %s: %s key not present",
+                                     qtype, key)
+                
+            self.quota[qtype].update(toupdate[qtype])
+            
         
-        return ""
+        return updated

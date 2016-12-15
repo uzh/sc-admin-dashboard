@@ -43,7 +43,8 @@ class SetQuotaForm(FlaskForm):
     v_volumes = IntegerField('Number of volumes')
 
     s_gigabytes = IntegerField('Swift gigabytes')
-    
+
+    comment = StringField("Comment")
     submit = SubmitField('Set quota')
 
     def validate_c_ram(form, field):
