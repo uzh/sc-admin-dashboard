@@ -30,13 +30,13 @@ function BtoH(bytes) {
 }
 
 function GBtoH(gb){return BtoH(gb*2**30);}
+function MBtoH(mb){return BtoH(mb*2**20);}
 
 $(document).ready(function(){
     // initial values
-    var val=$("#v_gigabytes").val();
-    $('#v_gigabytes_tb').text(GBtoH(val));
-    var val=$("#s_bytes").val();
-    $('#s_bytes_tb').text(BtoH(val));
+    $('#v_gigabytes_tb').text(GBtoH($("#v_gigabytes").val()));
+    $('#s_bytes_tb').text(BtoH($("#s_bytes").val()));
+    $('#c_ram_gb').text(MBtoH($("#c_ram").val()));
     
     // keypress
     $('#v_gigabytes').keyup(function(event){
@@ -48,6 +48,11 @@ $(document).ready(function(){
         $('#s_bytes_tb').text(BtoH(val));
     });
 
+    $('#c_ram').keyup(function(event){
+        var val=$("#c_ram").val();
+        $('#c_ram_gb').text(MBtoH(val));
+    });
+    
 })
 
 
@@ -80,6 +85,7 @@ Current roles:
     <label for="c_ram" class="col-xs-1 col-form-label">RAM (MB)</label>
     <div class="col-xs-2">
       {{ form.c_ram(class="form-control") }}
+      (<span id="c_ram_gb">{{ form.c_ram.data/2**10 }} GB</span>)
     </div>
   </div>
 
