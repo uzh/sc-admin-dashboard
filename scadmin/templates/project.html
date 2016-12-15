@@ -3,8 +3,7 @@
 {% block title %}Show project {{project.name}}{% endblock title %}
 {% block maincontent %}
 {% if error %}
-<div class="bs-callout bs-callout-danger">
-  <h4>ERROR</h4>
+<div class="alert alert-danger">
   {{error}}
 </div>
 {% endif %}
@@ -39,6 +38,7 @@
   </tbody>
 </table>
 
+{% if users is defined %}
 <h1>Users in project {{project.name}}</h1>
 <table class="table table-striped">
   <thead>
@@ -68,4 +68,6 @@
 </table>
 
 {{ wtf.quick_form(form)}}
+{% endif %}
+
 {% endblock maincontent %}

@@ -73,7 +73,6 @@ def create_project():
 def show_project(project_id):
     form = AddUserForm(request.form)
     data = {
-        'users': {},
         'auth': session['auth'],
         'project': None,
         'project_id': project_id,
@@ -91,12 +90,14 @@ def show_project(project_id):
             data['error'] = 'Unauthorized: unable to get info on project %s' % project_id
 
     if request.method == 'POST' and form.validate():
-        users = Users()
-        user = users.get(form.uid.data)
-        data['project'].grant(form.uid.data, form.role.data)
+        try:
+            users = Users()
+            user = users.get(form.uid.data)
+            data['project'].grant(form.uid.data, form.role.data)
 
-        data['message'] = 'User %s added to project'
-
+            data['message'] = 'User %s added to project'
+        except Exception as ex:
+            data['error'] = "Error setting grant to user '%s': %s" % (form.uid.data, ex)
     try:
         if data['project']:
             data['users'] = data['project'].members()
