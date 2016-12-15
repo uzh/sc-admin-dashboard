@@ -30,6 +30,7 @@ from scadmin.exceptions import InsufficientAuthorization
 from scadmin import config
 from flask import current_app as app
 
+from keystoneclient.v3 import client as keystone_client
 from novaclient.client import Client as nova_client
 from cinderclient import client as cinder_client
 from neutronclient.v2_0 import client as neutron_client
@@ -40,6 +41,7 @@ class Quota:
         self.project_id = project_id
         self.session = get_session()
 
+        self.keystone = keystone_client.Client(session=self.session)
         self.nova = nova_client('2', session=self.session)
         self.neutron = neutron_client.Client(session=self.session)
         self.cinder = cinder_client.Client('2', session=self.session)
@@ -49,9 +51,9 @@ class Quota:
         try:
             swift_service = self.keystone.services.find(type='object-store')
             swift_endpoint = self.keystone.endpoints.find(service_id=swift_service.id, interface='public')
-            self.storage_url = swift_endpoint.url % dict(tenant_id=self.project.id)
-            log.info("Using swift storage_url %s", self.storage_url)
-            account = swiftclient.head_account(self.storage_url, token)
+            self.storage_url = swift_endpoint.url % dict(tenant_id=self.project_id)
+            app.logger.info("Using swift storage_url %s", self.storage_url)
+            account = swiftclient.head_account(self.storage_url, self.session.get_token())
             swift_curquota = account.get('x-account-meta-quota-bytes', -1)
         except Exception as ex:
             app.logger.warning("No swift endpoint found. (exception was: %s", ex)
@@ -62,7 +64,7 @@ class Quota:
             'nova': { },
             'neutron': {},
             'cinder': {},
-            'swift': {'gigabytes': swift_curquota},
+            'swift': {'bytes': swift_curquota},
         }
 
         # Get nova quota
@@ -170,4 +172,4 @@ class Quota:
         account = swiftclient.head_account(self.storage_url, token)
         swiftclient.post_account(url=self.storage_url,
                                  token=token,
-                                 headers={'x-account-meta-quota-bytes': str(quota['gigabytes'])})
+                                 headers={'x-account-meta-quota-bytes': str(quota['bytes'])})

@@ -54,6 +54,8 @@ def fill_session_data(sess):
                 break
     auth['project_name'] = project.name
     auth['roles'] = sess.auth.auth_ref.role_names
+    auth['regular_member'] = False if set(('admin', 'project_admin', 'usermanager')).intersection(auth['roles']) else True
+
     session['auth'] = auth
 
 def authenticate_with_password(username, password):

@@ -2,7 +2,7 @@
 
 {% block title %}List of projects{% endblock title %}
 {% block maincontent %}
-<h1>Current roles in project <i>{{project.name}}</i>:</h1>
+<h1>Current roles in project <i>{{curproject.name}}</i>:</h1>
 <ul>
   {% for role in auth.roles %}
   <li>{{role}}</li>
@@ -47,8 +47,10 @@
       </td>
       {% endif %}
       <td>
-        {% if project.myroles and project.p.name != auth.project_name %}
+        {% if project.p.name != auth.project_name %}
+        {% if auth.regular_member or project.myroles  %}
         <a href="/project/{{project.p.id}}/active">set active</a>
+        {% endif %}
         {% endif %}
       </td>
     </tr>

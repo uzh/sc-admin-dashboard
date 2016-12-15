@@ -50,7 +50,6 @@ class Project:
                 if project.id == self.session.auth.project_id:
                     self.project = project
 
-
     def __getattr__(self, attr):
         # Some attributes we want to pass them down to self.project
         if attr in ['owner', 'owner_email',
@@ -102,23 +101,38 @@ class Projects:
         self.id = self.project.id
         self.name = self.project.name
 
+
     def list(self):
-        try:
+        plist = []
+        
+        # FIXME!!! Hardcoding the role meaning!
+
+        if 'admin' in session['auth']['roles'] or 'usermanager' in session['auth']['roles']:
             projects = self.keystone.projects.list()
+            rolenames = {r.id: r.name for r in self.keystone.roles.list()}
             roles = self.keystone.role_assignments.list()
             myroles = self.keystone.role_assignments.list(user=self.session.get_user_id())
-        except:
+        elif 'project_admin' in session['auth']['roles']:
             projects = self.keystone.projects.list(user=self.session.get_user_id())
-            roles = self.keystone.role_assignments.list(user=self.session.get_user_id())
-            myroles = roles
-        rolenames = {r.id: r.name for r in self.keystone.roles.list()}
-        plist = []
-        for project in projects:
-            plist.append({
-                'p': project,
-                'roles': [rolenames.get(r.role['id']) for r in roles if r.scope['project']['id'] == project.id],
-                'myroles': [rolenames.get(r.role['id']) for r in myroles if r.scope['project']['id'] == project.id],
-            })
+            rolenames = {r.id: r.name for r in self.keystone.roles.list()}
+            myroles = self.keystone.role_assignments.list(user=self.session.get_user_id())
+            roles = myroles
+        else:
+            projects = self.keystone.projects.list(user=self.session.get_user_id())
+            
+
+        if not session['auth']['regular_member']:
+            for project in projects:
+                plist.append({
+                    'p': project,
+                    'roles': [rolenames.get(r.role['id']) for r in roles if r.scope['project']['id'] == project.id],
+                    'myroles': [rolenames.get(r.role['id']) for r in myroles if r.scope['project']['id'] == project.id],
+                })
+        else:
+            # Regular member
+            for project in projects:
+                plist.append({'p': project})
+            
         return plist
 
     def create(self, form):

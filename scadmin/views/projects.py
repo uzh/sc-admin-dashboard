@@ -48,7 +48,7 @@ def list_projects():
                            # projects=[],
                            projects=projects.list(),
                            auth=session['auth'],
-                           project=projects.project)
+                           curproject=projects.project)
 
 @main_bp.route('project/<project_id>/active')
 @authenticated
@@ -125,7 +125,7 @@ def quota(project_id):
     if request.method == 'POST':
         form = SetQuotaForm(request.form)
         if not quota.has_swift():
-            del form.s_gigabytes
+            del form.s_bytes
         if form.validate():
             # Update quota
             try:
@@ -155,7 +155,7 @@ def quota(project_id):
             quota = Quota(project_id)
             form = SetQuotaForm(MultiDict(quota.to_dict()))
             if not quota.has_swift():
-                del form.s_gigabytes
+                del form.s_bytes
     else:
         form = SetQuotaForm(MultiDict(quota.to_dict()))
         if not quota.has_swift():

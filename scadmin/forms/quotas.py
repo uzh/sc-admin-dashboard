@@ -42,7 +42,7 @@ class SetQuotaForm(FlaskForm):
     v_gigabytes = IntegerField('Volumes: gigabytes')
     v_volumes = IntegerField('Number of volumes')
 
-    s_gigabytes = IntegerField('Swift gigabytes')
+    s_bytes = IntegerField('Swift bytes')
 
     comment = StringField("Comment")
     submit = SubmitField('Set quota')

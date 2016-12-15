@@ -16,6 +16,43 @@
 </div>
 {% endif %}
 
+
+<script type="text/javascript">
+
+function BtoH(bytes) {
+    if (bytes>=2**50) {bytes=(bytes/2**50).toFixed(2)+' PB';}
+    else if (bytes>=2**40) {bytes=(bytes/2**40).toFixed(2)+' TB';}
+    else if (bytes>=2**30) {bytes=(bytes/2**30).toFixed(2)+' GB';}
+    else if (bytes>=2**20)    {bytes=(bytes/2**20).toFixed(2)+' MB';}
+    else if (bytes>=2**10)       {bytes=(bytes/2**10).toFixed(2)+' KB';}
+    else if (bytes>1)           {bytes=bytes+' bytes';}
+    return bytes;
+}
+
+function GBtoH(gb){return BtoH(gb*2**30);}
+
+$(document).ready(function(){
+    // initial values
+    var val=$("#v_gigabytes").val();
+    $('#v_gigabytes_tb').text(GBtoH(val));
+    var val=$("#s_bytes").val();
+    $('#s_bytes_tb').text(BtoH(val));
+    
+    // keypress
+    $('#v_gigabytes').keyup(function(event){
+        var val=$("#v_gigabytes").val();
+        $('#v_gigabytes_tb').text(GBtoH(val));
+    });
+    $('#s_bytes').keyup(function(event){
+        var val=$("#s_bytes").val();
+        $('#s_bytes_tb').text(BtoH(val));
+    });
+
+})
+
+
+</script>
+
 <h1>Quota for project {{project.name}}</h1>
 
 Current roles:
@@ -93,17 +130,19 @@ Current roles:
     <label for="v_gigabytes" class="col-xs-1 col-form-label">Gigabytes</label>  
     <div class="col-xs-2">
       {{ form.v_gigabytes(class="form-control") }}
+      (<span id="v_gigabytes_tb">{{ form.v_gigabytes.data/2**10 }} TB</span>)
     </div>
     
 
   </div>
 
-  {% if form.s_gigabytes %}
+  {% if form.s_bytes %}
   <h2>Object Storage (swift)</h2>
   <div class="form-group row">
-    <label for="s_gigabytes" class="col-xs-1 col-form-label">Gigabytes</label>  
+    <label for="s_bytes" class="col-xs-1 col-form-label">Bytes</label>  
     <div class="col-xs-2">
-      {{ form.s_gigabytes(class="form-control") }}
+      {{ form.s_bytes(class="form-control") }}
+      (<span id="s_bytes_tb">{{ form.s_bytes.data/2**40 }} TB</span>)
     </div>
   </div>
   {% endif %}
