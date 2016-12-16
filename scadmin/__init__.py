@@ -45,9 +45,13 @@ class UserElement(nave.Text):
 class ProjectCreation(nave.View):
     def __init__(self):
         pass
-
+    
     def get_url(self):
         return url_for('main.create_project')
+
+    @property
+    def endpoint(self):
+        return self.get_url()
 
     @property
     def text(self):
