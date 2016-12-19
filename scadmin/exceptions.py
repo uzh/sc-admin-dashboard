@@ -48,3 +48,6 @@ class AuthenticationRequired(InvalidUsage):
 
 class InsufficientAuthorization(Exception):
     pass
+
+class NotFound(Exception):
+    pass

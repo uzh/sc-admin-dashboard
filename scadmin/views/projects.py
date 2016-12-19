@@ -32,7 +32,7 @@ from scadmin.auth import authenticated, authenticate_with_token
 from scadmin.models.projects import Projects, Project
 from scadmin.models.users import Users
 from scadmin.models.quota import Quota
-from scadmin.exceptions import InsufficientAuthorization
+from scadmin.exceptions import InsufficientAuthorization, NotFound
 from scadmin.forms.create_project import CreateProjectForm
 from scadmin.forms.adduser import AddUserForm
 from scadmin.forms.quotas import SetQuotaForm
@@ -184,5 +184,8 @@ def search_user():
 @authenticated
 def get_user(uid):
     users = Users()
-    user = users.get(uid)
+    try:
+        user = users.get(uid)
+    except NotFound:
+        return jsonify({})
     return jsonify(user)

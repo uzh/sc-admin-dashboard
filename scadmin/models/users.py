@@ -25,11 +25,11 @@ __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 from flask import session
 
 from scadmin.auth import get_session
-from scadmin.exceptions import InsufficientAuthorization
+from scadmin.exceptions import InsufficientAuthorization, NotFound
 from scadmin import config
 
 from keystoneclient.v3 import client as keystone_client
-from keystoneauth1.exceptions.http import Forbidden
+from keystoneauth1.exceptions.http import Forbidden, NotFound as http_NotFound
 
 from collections import defaultdict
 
@@ -43,7 +43,7 @@ class Users:
     def list(self):
         users = defaultdict(list)
         rolenames  = {r.id: r.name for r in self.keystone.roles.list()}
-        
+
         for role in self.keystone.role_assignments.list():
             users[role.user['id']].append({'project': role.scope['project']['id'],
                                            'role': rolenames.get(role.role['id'])})
@@ -54,5 +54,9 @@ class Users:
         return users
 
     def get(self, uid):
-        user = self.keystone.users.get(uid)
+        try:
+            user = self.keystone.users.get(uid)
+        except http_NotFound as ex:
+            raise NotFound('User %s not found' % uid)
+        
         return user.to_dict()

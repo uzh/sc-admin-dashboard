@@ -2,6 +2,22 @@
 
 {% block title %}Show project {{project.name}}{% endblock title %}
 {% block maincontent %}
+<script type="text/javascript">
+  function getUserDetail(){
+  $.get("/user/" + $("#uid").val(), function(data){
+    if(data.id == null){
+      $("#user-detail").html("No user '"+ $("#uid").val() + "' found");
+    }else{
+      $("#user-detail").html("\
+<table class='table'>\
+<tbody>\
+<tr><th style='border-top: 0px'>user id</th><td style='border-top: 0px'>"+data.id+"</td></tr>\
+<tr><th style='border-top: 0px'>email</th><td style='border-top: 0px'>"+data.email+"</td></tr>\
+</table>");
+    }
+  });
+  }
+</script>
 {% if error %}
 <div class="alert alert-danger">
   {{error}}
@@ -75,11 +91,21 @@
     <div class="col-xs-3">
       {{ form.uid(class="form-control") }}
     </div>
+    <div class="col-xs-1">
+      <input type="button" class="btn" onclick="getUserDetail()" value="Show user"></input>
+    </div>
+    <div id="user-detail" class="col-xs-3">
+
+    </div>
+  </div>
+  <div class="form-group row">
 
     <label for="role" class="col-xs-1 col-form-label">Role</label>
     <div class="col-xs-3">
       {{ form.role(class="form-control") }}
     </div>
+  </div>
+    <div class="form-group row">
 
     <div class="col-xs-3">
       {{form.submit(class="btn btn-default")}}
@@ -89,4 +115,5 @@
 </form>
 {% endif %}
 
+<div></div>
 {% endblock maincontent %}
