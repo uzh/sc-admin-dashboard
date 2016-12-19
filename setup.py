@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='sc-admin-dashboard',
-    packages=['scadmin'],
+    packages=['scadmin', 'scadmin.auth', 'scadmin.forms', 'scadmin.models', 'scadmin.views'],
     include_package_data=True,
     install_requires=[
         'Flask',
