@@ -46,7 +46,9 @@ class Quota:
         self.neutron = neutron_client.Client(session=self.session)
         self.cinder = cinder_client.Client('2', session=self.session)
         self.storage_url = None
+        self.update_quota()
 
+    def update_quota(self):
         # Create swift client
         try:
             swift_service = self.keystone.services.find(type='object-store')
@@ -68,21 +70,21 @@ class Quota:
         }
 
         # Get nova quota
-        quota = self.nova.quotas.get(project_id)
+        quota = self.nova.quotas.get(self.project_id)
         self.quota['nova'] = {
             'cores': quota.cores,
             'instances': quota.instances,
-            'ram': quota.ram,
+            'ram': quota.ram * 2**20,
         }
 
-        quota = self.cinder.quotas.get(project_id)
+        quota = self.cinder.quotas.get(self.project_id)
         self.quota['cinder'] = {
             'volumes': quota.volumes,
-            'gigabytes': quota.gigabytes,
+            'gigabytes': quota.gigabytes * 2**30,
         }
-        
+
         # Get neutron quota
-        quota = self.neutron.show_quota(project_id)['quota']
+        quota = self.neutron.show_quota(self.project_id)['quota']
         self.quota['neutron'].update(quota)
 
     def has_swift(self):
@@ -121,47 +123,56 @@ class Quota:
             if key[:2] == 's_':
                 toret['swift'][key[2:]] = value
         return toret
-    
+
     def set(self, quota):
         """Update quota for project"""
         toupdate = self.from_dict(quota)
-        updated = {}
-        
+        updated = defaultdict(dict)
         # Check if we need to update nova quota
         for key, value in list(toupdate['nova'].items()):
             if value == self.quota['nova'][key]:
                 del toupdate['nova'][key]
+            else:
+                updated['nova'][key] = (self.quota['nova'][key], toupdate['nova'][key])
+
+        if toupdate['nova']:
+            # All quota is stored in bytes, but nova wants ram quota in megabytes
+            if 'ram' in toupdate['nova']:
+                toupdate['nova']['ram'] = int(toupdate['nova']['ram']/2**20)
+                updated['nova']['ram'] = (
+                    int(self.quota['nova']['ram']/2**20),
+                    toupdate['nova']['ram'])
         self.nova.quotas.update(self.project_id, **toupdate['nova'])
-        
+
         for key, value in list(toupdate['cinder'].items()):
             if value == self.quota['cinder'][key]:
                 del toupdate['cinder'][key]
-        self.cinder.quotas.update(self.project_id, **toupdate['cinder'])
+            else:
+                updated['cinder'][key] = (self.quota['cinder'][key], toupdate['cinder'][key])
+        if toupdate['cinder']:
+            # All quota is stored in bytes, but cinder wants quota in gigabytes
+            if 'gigabytes' in toupdate['cinder']:
+                toupdate['cinder']['gigabytes'] = int(toupdate['cinder']['gigabytes']/2**30)
+                updated['cinder']['gigabytes'] = (
+                    self.quota['cinder']['gigabytes']/2**30,
+                    toupdate['cinder']['gigabytes'])
+            self.cinder.quotas.update(self.project_id, **toupdate['cinder'])
 
         for key, value in list(toupdate['neutron'].items()):
             if value == self.quota['neutron'][key]:
                 del toupdate['neutron'][key]
+            else:
+                updated['neutron'][key] = (self.quota['neutron'][key], toupdate['neutron'][key])
         self.neutron.update_quota(self.project_id, {'quota': toupdate['neutron']})
 
         for key, value in list(toupdate['swift'].items()):
             if value is None or value == self.quota['swift'][key]:
                 del toupdate['swift'][key]
-        # updating swift quota is trickier
-        self._update_swift_quota(toupdate['swift'])
-        
-        updated = {}
-        for qtype in ['nova', 'cinder', 'neutron', 'swift']:
-            updated[qtype] = {}
-            for key, value in toupdate[qtype].items():
-                try:
-                    updated[qtype][key] = (self.quota[qtype][key], value)
-                except KeyError:
-                    app.logger.error("Ignoring error while updating quota for %s: %s key not present",
-                                     qtype, key)
-                
-            self.quota[qtype].update(toupdate[qtype])
-            
-        
+            else:
+                updated['swift'][key] = (self.quota['swift'][key], toupdate['swift'][key])
+
+        # Re-read from API
+        self.update_quota()
         return updated
 
     def _update_swift_quota(self, quota):

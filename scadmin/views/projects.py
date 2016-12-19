@@ -66,7 +66,7 @@ def create_project():
         project = projects.create(form)
         return redirect('project/%s' % project.id)
     return render_template('create-project.html', form=form)
-    
+
 
 @main_bp.route('project/<project_id>', methods=['GET', 'POST'])
 @authenticated
@@ -161,7 +161,7 @@ def quota(project_id):
         form = SetQuotaForm(MultiDict(quota.to_dict()))
         if not quota.has_swift():
             del form.s_bytes
-        
+
 
     return render_template('quota.html',
                            project=project,
@@ -186,4 +186,3 @@ def get_user(uid):
     users = Users()
     user = users.get(uid)
     return jsonify(user)
-

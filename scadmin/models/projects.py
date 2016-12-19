@@ -22,7 +22,7 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import session
+from flask import session, current_app as app
 from collections import defaultdict
 
 from scadmin.auth import get_session
@@ -92,7 +92,7 @@ class Project:
         except AttributeError:
             app.logger.info("quota_history property not present in project %s", self.project.name)
             self.keystone.projects.update(self.project, quota_history=history)
-        
+
 class Projects:
     def __init__(self):
         self.session = get_session()
@@ -104,7 +104,7 @@ class Projects:
 
     def list(self):
         plist = []
-        
+
         # FIXME!!! Hardcoding the role meaning!
 
         if 'admin' in session['auth']['roles'] or 'usermanager' in session['auth']['roles']:
@@ -119,7 +119,7 @@ class Projects:
             roles = myroles
         else:
             projects = self.keystone.projects.list(user=self.session.get_user_id())
-            
+
 
         if not session['auth']['regular_member']:
             for project in projects:
@@ -132,7 +132,7 @@ class Projects:
             # Regular member
             for project in projects:
                 plist.append({'p': project})
-            
+
         return plist
 
     def create(self, form):

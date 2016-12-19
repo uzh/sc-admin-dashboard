@@ -17,47 +17,6 @@
 {% endif %}
 
 
-<script type="text/javascript">
-
-function BtoH(bytes) {
-    if (bytes>=2**50) {bytes=(bytes/2**50).toFixed(2)+' PB';}
-    else if (bytes>=2**40) {bytes=(bytes/2**40).toFixed(2)+' TB';}
-    else if (bytes>=2**30) {bytes=(bytes/2**30).toFixed(2)+' GB';}
-    else if (bytes>=2**20)    {bytes=(bytes/2**20).toFixed(2)+' MB';}
-    else if (bytes>=2**10)       {bytes=(bytes/2**10).toFixed(2)+' KB';}
-    else if (bytes>1)           {bytes=bytes+' bytes';}
-    return bytes;
-}
-
-function GBtoH(gb){return BtoH(gb*2**30);}
-function MBtoH(mb){return BtoH(mb*2**20);}
-
-$(document).ready(function(){
-    // initial values
-    $('#v_gigabytes_tb').text(GBtoH($("#v_gigabytes").val()));
-    $('#s_bytes_tb').text(BtoH($("#s_bytes").val()));
-    $('#c_ram_gb').text(MBtoH($("#c_ram").val()));
-    
-    // keypress
-    $('#v_gigabytes').keyup(function(event){
-        var val=$("#v_gigabytes").val();
-        $('#v_gigabytes_tb').text(GBtoH(val));
-    });
-    $('#s_bytes').keyup(function(event){
-        var val=$("#s_bytes").val();
-        $('#s_bytes_tb').text(BtoH(val));
-    });
-
-    $('#c_ram').keyup(function(event){
-        var val=$("#c_ram").val();
-        $('#c_ram_gb').text(MBtoH(val));
-    });
-    
-})
-
-
-</script>
-
 <h1>Quota for project {{project.name}}</h1>
 
 Current roles:
@@ -72,84 +31,45 @@ Current roles:
   <h2>Compute (nova)</h2>
   <div class="form-group row">
 
-    <label for="c_cores" class="col-xs-1 col-form-label">Nr. vCores</label>
-    <div class="col-xs-2">
-      {{ form.c_cores(class="form-control", size=4) }}
-    </div>
+    {{ form.c_cores(class="form-control", size=4) }}
 
-    <label for="c_instances" class="col-xs-1 col-form-label">Nr. of instances</label>
-    <div class="col-xs-2">
-      {{ form.c_instances(class="form-control", size=4) }}
-    </div>
+    {{ form.c_instances(class="form-control", size=4) }}
 
-    <label for="c_ram" class="col-xs-1 col-form-label">RAM (MB)</label>
-    <div class="col-xs-2">
-      {{ form.c_ram(class="form-control") }}
-      (<span id="c_ram_gb">{{ form.c_ram.data/2**10 }} GB</span>)
-    </div>
+    {{ form.c_ram(class="form-control") }}
   </div>
 
   <h2>Network (neutron)</h2>
   <div class="form-group row">
-    <label for="n_port" class="col-xs-1 col-form-label">Nr. of ports</label>  
-    <div class="col-xs-2">
       {{ form.n_port(class="form-control") }}
-    </div>
 
-    <label for="n_network" class="col-xs-1 col-form-label">Nr. of networks</label>  
-    <div class="col-xs-2">
       {{ form.n_network(class="form-control") }}
-    </div>
 
-    <label for="n_subnet" class="col-xs-1 col-form-label">Nr. of subnets</label>  
-    <div class="col-xs-2">
       {{ form.n_subnet(class="form-control") }}
-    </div>
   </div>
 
   <!-- neutron, second row -->
   <div class="form-group row">
-    <label for="n_security_group" class="col-xs-1 col-form-label">Nr. of security groups</label>  
-    <div class="col-xs-2">
       {{ form.n_security_group(class="form-control") }}
-    </div>
 
-    <label for="n_floatingip" class="col-xs-1 col-form-label">Nr. of Floating IPs</label>  
-    <div class="col-xs-2">
       {{ form.n_floatingip(class="form-control") }}
-    </div>
 
-    <label for="n_router" class="col-xs-1 col-form-label">Nr. of routers</label>  
-    <div class="col-xs-2">
       {{ form.n_router(class="form-control") }}
-    </div>
   </div>
   
 
   <h2>Block Storage (cinder)</h2>
   <div class="form-group row">
-    <label for="v_volumes" class="col-xs-1 col-form-label">Nr. of volumes</label>  
-    <div class="col-xs-2">
-      {{ form.v_volumes(class="form-control") }}
-    </div>
 
-    <label for="v_gigabytes" class="col-xs-1 col-form-label">Gigabytes</label>  
-    <div class="col-xs-2">
-      {{ form.v_gigabytes(class="form-control") }}
-      (<span id="v_gigabytes_tb">{{ form.v_gigabytes.data/2**10 }} TB</span>)
-    </div>
-    
+    {{ form.v_volumes(class="form-control")}}    
+
+    {{ form.v_gigabytes(class="form-control")}}    
 
   </div>
 
   {% if form.s_bytes %}
   <h2>Object Storage (swift)</h2>
   <div class="form-group row">
-    <label for="s_bytes" class="col-xs-1 col-form-label">Bytes</label>  
-    <div class="col-xs-2">
-      {{ form.s_bytes(class="form-control") }}
-      (<span id="s_bytes_tb">{{ form.s_bytes.data/2**40 }} TB</span>)
-    </div>
+    {{ form.s_bytes(class="form-control") }}
   </div>
   {% endif %}
 
