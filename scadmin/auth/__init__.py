@@ -90,7 +90,7 @@ def get_session(project_id=None, project_domain_id=None):
 
     auth = v3.Token(
         auth_url=config.os_auth_url,
-        token=session['auth']['token'],
+        token=str(session['auth']['token']),
         project_id=project_id,
         project_domain_id=project_domain_id,
     )
