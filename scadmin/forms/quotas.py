@@ -71,6 +71,21 @@ $(document).ready(function(){registerConverter('#%s')})
 
         return HTMLString(str.join('\n', (label, input, javascript)))
 
+def b_to_human(value):
+    """Convert bytes to human readable string"""
+    value = float(value)
+    for unit, threshold in [('EiB', 2**60),
+                            ('PiB', 2**50),
+                            ('TiB', 2**40),
+                            ('GiB', 2**30),
+                            ('MiB', 2**20),
+                            ('KiB', 2**10),
+                            ]:
+        if value > threshold:
+            return "%.2f %s" % (value/threshold, unit)
+    return "%d B" % value
+    
+    
 class SetQuotaForm(FlaskForm):
     c_instances = S3ITField('Nr. of Instances')
     c_cores = S3ITField('Nr. of vCores')
@@ -95,7 +110,7 @@ class SetQuotaForm(FlaskForm):
     def validate_c_ram(form, field):
         if field.data != 4*2**30*form.c_cores.data:
             raise validators.ValidationError(
-                "Ram should be 4 GiB x nr.vcores, in this case: %d B instead of %d B" % (4*2**30*form.c_cores.data, field.data))
+                "Ram should be 4 GiB x nr.vcores, in this case: %s instead of %s" % (b_to_human(4*2**30*form.c_cores.data), b_to_human(field.data)))
 
     def validate_n_port(form, field):
         if field.data < form.c_instances.data:
