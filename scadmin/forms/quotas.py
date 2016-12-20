@@ -89,7 +89,7 @@ class SetQuotaForm(FlaskForm):
 
     s_bytes = BytesField('Swift bytes')
 
-    comment = StringField("Comment")
+    comment = StringField("Comment", [validators.DataRequired()])
     submit = SubmitField('Set quota')
 
     def validate_c_ram(form, field):
