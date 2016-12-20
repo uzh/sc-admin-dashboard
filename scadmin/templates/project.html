@@ -75,7 +75,7 @@
         {{ role }}
       </td>
       <td>
-        <a href="{{project_id}}/revoke?userid={{user}}&role={{role}}">revoke</a>
+        <a href="{{url_for('main.revoke_grant', project_id=project_id)}}?userid={{user}}&role={{role}}">revoke</a>
       </td>
     </tr>
     {% endfor %}

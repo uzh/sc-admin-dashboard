@@ -24,7 +24,7 @@ __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
 from datetime import datetime
 
-from flask import session, request, render_template, redirect, current_app as app
+from flask import session, request, render_template, redirect, url_for, current_app as app
 from flask.json import jsonify
 from  werkzeug.datastructures import MultiDict
 

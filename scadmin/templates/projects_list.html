@@ -30,7 +30,7 @@
     {% for project in projects %}
     <tr>
       <td class="sortable normal_column">
-        <a href="/project/{{project.p.id}}">{{ project.p.name }}</a>
+        <a href="{{url_for('main.show_project', project_id=project.p.id)}}">{{ project.p.name }}</a>
       </td>
       <td class="sortable normal_column">
         {{ project.p.owner }}
@@ -43,13 +43,13 @@
       </td>
       {% if 'usermanager' in auth.roles or 'admin' in auth.roles %}
       <td>
-        <a href="/quota/{{project.p.id}}">set quota</a>
+        <a href="{{url_for('main.quota', project_id=project.p.id)}}">set quota</a>
       </td>
       {% endif %}
       <td>
         {% if project.p.name != auth.project_name %}
         {% if auth.regular_member or project.myroles  %}
-        <a href="/project/{{project.p.id}}/active">set active</a>
+        <a href="{{url_for('main.set_active_project', project_id=project.p.id)}}">set active</a>
         {% endif %}
         {% endif %}
       </td>
