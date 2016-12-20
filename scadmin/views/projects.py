@@ -127,6 +127,7 @@ def quota(project_id):
         form = SetQuotaForm(request.form)
         if not quota.has_swift():
             del form.s_bytes
+
         if form.validate():
             # Update quota
             try:
@@ -157,6 +158,8 @@ def quota(project_id):
             form = SetQuotaForm(MultiDict(quota.to_dict()))
             if not quota.has_swift():
                 del form.s_bytes
+        else:
+            error += 'Some data is missing/wrong.'
     else:
         form = SetQuotaForm(MultiDict(quota.to_dict()))
         if not quota.has_swift():

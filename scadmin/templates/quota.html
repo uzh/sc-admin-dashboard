@@ -82,8 +82,13 @@ Current roles:
 
   <h2>Commit log</h2>
   <div class="form-group row">
+    {% if form.comment.errors %}
+    <div class="col-xs-10 has-error">
+      {% else %}
     <div class="col-xs-10">
+    {% endif %}
       {{form.comment(class="form-control")}}
+      <span class="help-block">{% for line in form.comment.errors %}{{line}}<br />{% endfor %}</span>
     </div>
   </div>
   
