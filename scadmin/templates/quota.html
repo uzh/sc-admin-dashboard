@@ -67,6 +67,13 @@ Current roles:
   </div>
 
   {% if form.s_bytes %}
+  {% if 'ResellerAdmin' not in auth.roles %}
+  <div class="alert alert-danger">
+    You don't currently have the role <b>ResellerAdmin</b>. This
+    might prevent you from updating Swift quota.
+  </div>
+  {% endif %}
+  
   <h2>Object Storage (swift)</h2>
   <div class="form-group row">
     {{ form.s_bytes(class="form-control") }}
