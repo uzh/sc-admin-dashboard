@@ -4,7 +4,7 @@
 {% block maincontent %}
 <script type="text/javascript">
   function getUserDetail(){
-  $.get("/user/" + $("#uid").val(), function(data){
+  $.get({{url_for('main.get_user', uid='')}}+$("#uid").val(), function(data){
     if(data.id == null){
       $("#user-detail").html("No user '"+ $("#uid").val() + "' found");
     }else{
