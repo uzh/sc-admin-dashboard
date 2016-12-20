@@ -54,7 +54,7 @@ def list_projects():
 @authenticated
 def set_active_project(project_id):
     authenticate_with_token(project_id=project_id)
-    return redirect('/')
+    return redirect(url_for('main.list_projects'))
 
 @main_bp.route('create-project', methods=['GET', 'POST'])
 @authenticated

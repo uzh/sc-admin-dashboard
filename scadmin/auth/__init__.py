@@ -125,7 +125,7 @@ def login():
 
     if request.method == 'POST' and form.validate():
         authenticate_with_password(form.username.data, form.password.data)
-        return redirect('/')
+        return redirect(url_for('main.list_projects'))
     return render_template('auth/login.html', form=form)
 
 @login_bp.route('/logout')
