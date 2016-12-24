@@ -20,8 +20,8 @@ function SignedBtoH(bytes){
     }
 }
 
-function GBtoH(gb){return BtoH(gb*2**30);}
-function MBtoH(mb){return BtoH(mb*2**20);}
+function GBtoH(gb){return BtoH(gb*Math.pow(2,30));}
+function MBtoH(mb){return BtoH(mb*Math.pow(2,20));}
     
 function HtoB(input){
     var validAmount  = function(n) {
