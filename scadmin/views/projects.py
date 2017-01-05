@@ -32,6 +32,7 @@ from scadmin.auth import authenticated, authenticate_with_token
 from scadmin.models.projects import Projects, Project
 from scadmin.models.users import Users
 from scadmin.models.quota import Quota
+from scadmin.models.sympa import ML
 from scadmin.exceptions import InsufficientAuthorization, NotFound
 from scadmin.forms.create_project import CreateProjectForm
 from scadmin.forms.adduser import AddUserForm
@@ -76,7 +77,8 @@ def show_project(project_id):
         'auth': session['auth'],
         'project': None,
         'project_id': project_id,
-        'form': form
+        'form': form,
+        'error': '',
     }
 
     try:
@@ -87,7 +89,7 @@ def show_project(project_id):
             authenticate_with_token(project_id=project_id)
             data['project'] = Project(project_id)
         except InsufficientAuthorization:
-            data['error'] = 'Unauthorized: unable to get info on project %s' % project_id
+            data['error'] += 'Unauthorized: unable to get info on project %s\n' % project_id
 
     if request.method == 'POST' and form.validate():
         try:
@@ -96,8 +98,17 @@ def show_project(project_id):
             data['project'].grant(form.uid.data, form.role.data)
 
             data['message'] = 'User %s added to project'
+
+            # Add user to mailing list
+            if config.USE_SYMPA:
+                ml = ML()
+                info, err = ml.add([user['mail']])
+                if err:
+                    data['error'] += 'Error while adding user to mailing list: %s\n' % err
         except Exception as ex:
-            data['error'] = "Error setting grant to user '%s': %s" % (form.uid.data, ex)
+            data['error'] += "Error setting grant to user '%s': %s\n" % (form.uid.data, ex)
+
+            
     try:
         if data['project']:
             data['users'] = data['project'].members()

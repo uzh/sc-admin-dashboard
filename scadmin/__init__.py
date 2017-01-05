@@ -64,7 +64,8 @@ def top_nav():
     if 'admin' in session['auth']['roles'] or \
        'usermanager' in session['auth']['roles']:
         elements.append(ProjectCreation())
-        elements.append(nave.View('Check mailing list users', 'sympa.list_users'))
+        if config.USE_SYMPA:
+            elements.append(nave.View('Check mailing list users', 'sympa.list_users'))
     elements += [UserElement(), nave.View('Logout', 'auth.logout')]
     return nave.Navbar(*elements)
 
@@ -79,4 +80,5 @@ nav.init_app(app)
 
 app.register_blueprint(main_bp, url_prefix='/')
 app.register_blueprint(login_bp, url_prefix='/auth')
-app.register_blueprint(sympa_bp, url_prefix='/sympa')
+if config.USE_SYMPA:
+    app.register_blueprint(sympa_bp, url_prefix='/sympa')

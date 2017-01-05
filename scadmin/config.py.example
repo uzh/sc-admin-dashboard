@@ -59,6 +59,8 @@ valid_faculties = [
 ]
 
 ### Sympa integration ###
+
+USE_SYMPA = False
 #
 ## Username to use when accessing Sympa
 # SYMPA_USERNAME =

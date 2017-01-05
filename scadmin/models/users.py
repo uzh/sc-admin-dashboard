@@ -51,7 +51,7 @@ class Users:
 
     def list_users(self, project_admins=False):
         users = []
-        
+
         for uid in set((u.user['id'] for u in self.keystone.role_assignments.list())):
             user = self.keystone.users.get(uid)
             if user.domain_id == 'default':
@@ -72,7 +72,7 @@ class Users:
                             emails.append(email)
                     except AttributeError:
                         pass
-            
+
         return users
 
     def search(self, username):
