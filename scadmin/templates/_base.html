@@ -19,7 +19,12 @@
   "paging": true,
   "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
   "order": [[0, 'asc']]});
-  $('#user-list-sympa').DataTable({
+  $('#user-list-sympa-missing').DataTable({
+  "paging": true,
+  "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+  "columnDefs": [{"targets": 0, "orderable": false, "width": "2em"}],
+  "order": [[1, 'asc']]});
+  $('#user-list-sympa-exceeding').DataTable({
   "paging": true,
   "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
   "columnDefs": [{"targets": 0, "orderable": false, "width": "2em"}],

@@ -53,17 +53,28 @@ class ML:
 
         self.br.submit_form(form)
 
-    def list(self):
+    def list(self, allusers=False):
         """Return a list of email addresses subscribed to the mailing list"""
         subscribers = []
         self.br.open(self.url_review)
 
         for row in self.br.find_all('tr'):
             email = row.find('a').text
-            if email:
+            if email and email.strip():
                 subscribers.append(email)
+
+        if allusers:
+            subscribers.extend([i[0] for i in config.SYMPA_EMAIL_MAPPINGS])
+            
         return subscribers
 
+    def missing_and_exceeding(self, users):
+        users = [u for u in users if u and u.strip()]
+        subscribers = self.list(allusers=True)
+        missing = set(users).difference(subscribers)
+        exceeding = set(subscribers).difference(users)
+        return missing, exceeding
+    
     def add(self, users, quiet=True):
         """Add all email addresses listed in `users to the mailing list.
 
@@ -104,7 +115,7 @@ class ML:
         self.br.submit_form(form)
 
         info, err = [], []
-        if br.find(id='ephemeralMsg'):
+        if self.br.find(id='ephemeralMsg'):
             info.extend(self.br.find(id='ephemeralMsg').text.strip().splitlines())
         if self.br.find(id='ErrorMsg'):
             err.extend(self.br.find(id='ErrorMsg').text.strip().splitlines())

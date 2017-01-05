@@ -32,6 +32,7 @@ class MultiCheckboxField(SelectMultipleField):
     option_widget = widgets.CheckboxInput()
 
 class SympaAddRemove(FlaskForm):
-    emails = MultiCheckboxField('email', choices=[])
+    email_add = MultiCheckboxField('email', choices=[])
+    email_remove = MultiCheckboxField('email', choices=[])
 
-    submit = SubmitField('Add users to mailing list')
+    submit = SubmitField('Add/remove users to mailing list')

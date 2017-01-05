@@ -41,25 +41,36 @@ def list_users():
     ml = ML()
 
     all_users = scusers.list_users(project_admins=True)
-    subscribers = ml.list()
-    # Add to the subscribers "wrong" email addresses
-    subscribers.extend([i[0] for i in config.SYMPA_EMAIL_MAPPINGS])
-    missing_email = set((u['email'] for u in all_users)).difference(subscribers)
+    users_email = [u['email'] for u in all_users] + [i[1] for i in config.SYMPA_EMAIL_MAPPINGS]
+
+    missing_email, exceeding = ml.missing_and_exceeding([u['email'] for u in all_users])
+
     missing = [u for u in all_users if u['email'] in missing_email]
 
-    form.emails.choices = [(i,i) for i in missing_email]
+    form.email_add.choices = [(i,i) for i in missing_email]
+    form.email_remove.choices = [(i,i) for i in exceeding]
 
     if request.method == 'POST' and form.validate():
-        to_add = [f.data for f in form.emails if f.checked]
-        info, err = ml.add(to_add)
+        to_add = [f.data for f in form.email_add if f.checked]
+        info, err = [], []
+        if to_add:
+            info, err = ml.add(to_add)
 
-        subscribers.extend(ml.list())
-        missing_email = set((u['email'] for u in all_users)).difference(subscribers)
+        to_remove = [f.data for f in form.email_remove if f.checked]
+        if to_remove:
+            info2, err2 = ml.remove(to_remove)
+            info += info2
+            err += err2
+        
+        missing_email, exceeding = ml.missing_and_exceeding([u['email'] for u in all_users])
         missing = [u for u in all_users if u['email'] in missing_email]
-        form.emails.choices = [(i,i) for i in missing_email]
+
+        form.email_add.choices = [(i,i) for i in missing_email]
+        form.email_remove.choices = [(i,i) for i in exceeding]
         return render_template('ml_users.html',
                                scusers=scusers,
                                missing=missing,
+                               exceeding=exceeding,
                                messages=info,
                                error=str.join('\n<br />', err),
                                ml=ml,
@@ -70,6 +81,7 @@ def list_users():
     return render_template('ml_users.html',
                            scusers=scusers,
                            missing=missing,
+                           exceeding=exceeding,
                            ml=ml,
                            form=form,
                            sy_user=config.SYMPA_USERNAME,
