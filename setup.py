@@ -10,6 +10,7 @@ setup(
         'Flask-Wtf',
         'Flask-Bootstrap',
         'Flask-Nav',
+        'robobrowser',
         'python-keystoneclient',
         'python-novaclient',
         'python-cinderclient',

@@ -2,19 +2,6 @@
 
 {% block title %}Quota for project {{project.name}}{% endblock title %}
 {% block maincontent %}
-{% if error %}
-<div class="alert alert-danger">
-  {{error}}
-</div>
-{% endif %}
-
-{% if messages %}
-<div class="alert alert-info">
-  {% for msg in messages %}
-  <p>{{msg}}</p>
-  {% endfor %}
-</div>
-{% endif %}
 
 
 <h1>Quota for project {{project.name}}</h1>

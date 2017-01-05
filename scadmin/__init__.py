@@ -27,8 +27,10 @@ from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 import flask_nav.elements as nave
 
-from scadmin.views import main_bp
+from scadmin.views import main_bp, sympa_bp
 from scadmin.auth import login_bp
+from scadmin import config
+
 
 # Navigation
 class UserElement(nave.Text):
@@ -45,7 +47,7 @@ class UserElement(nave.Text):
 class ProjectCreation(nave.View):
     def __init__(self):
         pass
-    
+
     def get_url(self):
         return url_for('main.create_project')
 
@@ -57,24 +59,24 @@ class ProjectCreation(nave.View):
     def text(self):
         return "Create Project"
 
-
-nav = Nav()
-
 def top_nav():
     elements = [nave.View('Project List', 'main.list_projects')]
     if 'admin' in session['auth']['roles'] or \
        'usermanager' in session['auth']['roles']:
         elements.append(ProjectCreation())
+        elements.append(nave.View('Check mailing list users', 'sympa.list_users'))
     elements += [UserElement(), nave.View('Logout', 'auth.logout')]
     return nave.Navbar(*elements)
 
+app = Flask(__name__)
+app.config.from_object('scadmin.config')
+
+nav = Nav()
 nav.register_element('top', top_nav)
 
-app = Flask(__name__)
 Bootstrap(app)
 nav.init_app(app)
 
-app.config.from_object('scadmin.config')
-
 app.register_blueprint(main_bp, url_prefix='/')
 app.register_blueprint(login_bp, url_prefix='/auth')
+app.register_blueprint(sympa_bp, url_prefix='/sympa')

@@ -58,3 +58,44 @@ valid_faculties = [
     ('VET', 'Vetsuisse'),
 ]
 
+### Sympa integration ###
+#
+## Username to use when accessing Sympa
+# SYMPA_USERNAME =
+
+## Password to use when acecssing Sympa as SYMPA_USERNAME
+# SYMPA_PASSWORD =
+
+## Url to use for sympa.
+# SYMPA_URL =
+
+## Sympa mailing list
+# SYMPA_LIST = "cloud"
+
+## Sympa default max size
+# SYMPA_SIZE = 1000
+
+## Alternate email mapping. The first element of the tuple is the
+## email address listed on ScienceCloud, the second element is the
+## email address he/she wants to be subscribed with. If second element
+## is None then the user is not subscribed to the mailing list.
+##
+## For instance, if:
+##
+## SYMPA_EMAIL_MAPPINGS = [
+##   ('ignoreme@example.org', None),
+##   ('foo.bar@uzh.ch', 'foo.bar@example.org'),
+## ]
+##
+## then:
+##
+## * 'ignore@example.org' will NOT be added to the mailing list if
+##   it's not already subscribed.
+##
+## * 'foo.bar@example.org' will be added to the mailing list if it's
+##   not already there, and 'foo.bar@example.org' will be used
+##   whenever we try to add 'foo.bar@uzh.ch'
+
+# SYMPA_EMAIL_MAPPINGS = [
+# (,),
+# ]

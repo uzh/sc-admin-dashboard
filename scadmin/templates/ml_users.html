@@ -1,0 +1,37 @@
+{% extends "_base.html" %}
+
+{% block title %}List of SC users not in the mailing list{% endblock title %}
+{% block maincontent %}
+
+<h1>List of SC users not in the mailing list</h1>
+
+<form action="" method="post" class="form" role="form">
+  {{ form.hidden_tag() }}
+
+<table  id="user-list-sympa" class="table table-striped table-bordered
+                                    table-striped datatable tablesorter
+                                    tablesorter-default">
+  <thead>
+    <tr class="table_caption">
+      <th data-sorter="false" class="sorter-false normal_column">add</th>
+      <th class="sortable normal_column tablesorter-header">email</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for choice in form.emails %}
+    <tr>
+      <td>
+        {{ choice() }}
+      </td>
+      <td>
+        {{ choice.data }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{{ form.submit(class="btn btn-default") }}
+</form>
+
+{% endblock maincontent %}

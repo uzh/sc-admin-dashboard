@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-#
 #
 #
-# Copyright (C) 2016, S3IT, University of Zurich. All rights reserved.
+# Copyright (C) 2017, S3IT, University of Zurich. All rights reserved.
 #
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -22,10 +22,16 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import Blueprint
-main_bp = Blueprint('main', __name__)
-sympa_bp = Blueprint('sympa', __name__)
+from wtforms import Form, widgets, SelectMultipleField, SubmitField, validators
+from flask_wtf import FlaskForm
+from scadmin import config
+from wtforms.widgets.core import HTMLString
 
-#from . import projects, quota, user
-from . import projects
-from . import sympa
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
+class SympaAddRemove(FlaskForm):
+    emails = MultiCheckboxField('email', choices=[])
+
+    submit = SubmitField('Add users to mailing list')

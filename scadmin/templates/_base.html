@@ -2,25 +2,30 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block styles %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" media="screen">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css" type="text/css" media="screen">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" media="screen">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css" type="text/css" media="screen">
 
-    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
-    <script type="text/javascript" src="{{url_for('static', filename='convert-utils.js') }}"></script>
-    <script type="text/javascript">
-    $(document).ready(function() {
-        $('#projects').DataTable({
-            "paging": true,
-            "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
-            "order": [[0, 'asc']]});
-        $('#user-list').DataTable({
-            "paging": true,
-            "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
-            "order": [[0, 'asc']]});
-    } );
-      </script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.3.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="{{url_for('static', filename='convert-utils.js') }}"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+  $('#projects').DataTable({
+  "paging": true,
+  "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+  "order": [[0, 'asc']]});
+  $('#user-list').DataTable({
+  "paging": true,
+  "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+  "order": [[0, 'asc']]});
+  $('#user-list-sympa').DataTable({
+  "paging": true,
+  "lengthMenu": [[25, 50, 100, -1], [25, 50, 100, "All"]],
+  "columnDefs": [{"targets": 0, "orderable": false, "width": "2em"}],
+  "order": [[1, 'asc']]});
+  } );
+</script>
 {% endblock styles %}
 
 {% block body %}
@@ -30,8 +35,24 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-10 col-md-offset-1">
-    {% block maincontent %}
-    {% endblock maincontent %}
+
+
+      {% if error %}
+      <div class="alert alert-danger">
+        {{error}}
+      </div>
+      {% endif %}
+
+      {% if messages %}
+      <div class="alert alert-info">
+        {% for msg in messages %}
+        <p>{{msg}}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block maincontent %}
+      {% endblock maincontent %}
     </div>
   </div>
 </div>

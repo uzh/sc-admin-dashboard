@@ -22,7 +22,7 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from flask import redirect, current_app as app, session, Blueprint, url_for, request, render_template
+from flask import redirect, current_app as app, session, Blueprint, url_for, request, render_template, abort
 
 from functools import wraps
 
@@ -118,6 +118,17 @@ def authenticated(f):
             return f(*args, **kw)
     return decorated
 
+def has_role(roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kw):
+            if 'auth' not in session:
+                return redirect(url_for('auth.login'))
+            elif not set(session['auth']['roles']).intersection(roles):
+                return abort(401)
+            return f(*args, **kw)
+        return decorated
+    return decorator
 
 @login_bp.route('/login', methods=['GET', 'POST'])
 def login():

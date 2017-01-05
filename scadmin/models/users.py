@@ -49,6 +49,32 @@ class Users:
                                            'role': rolenames.get(role.role['id'])})
         return users
 
+    def list_users(self, project_admins=False):
+        users = []
+        
+        for uid in set((u.user['id'] for u in self.keystone.role_assignments.list())):
+            user = self.keystone.users.get(uid)
+            if user.domain_id == 'default':
+                users.append({'id':uid, 'email':user.email})
+
+        emails = [u['email'] for u in users]
+
+        if project_admins:
+            for project in self.keystone.projects.list():
+                if not project.enabled:
+                    continue
+                for attr in ['owner', 'contact', 's3it_owner']:
+                    try:
+                        name = getattr(project, attr)
+                        email = getattr(project, attr+'_email')
+                        if email not in emails:
+                            users.append({'id': name, 'email': email})
+                            emails.append(email)
+                    except AttributeError:
+                        pass
+            
+        return users
+
     def search(self, username):
         users = {uid:u for uid,u in self.list().items() if username in uid}
         return users
@@ -58,5 +84,18 @@ class Users:
             user = self.keystone.users.get(uid)
         except http_NotFound as ex:
             raise NotFound('User %s not found' % uid)
-        
+
         return user.to_dict()
+
+    def admin_emails(self):
+        """List all email addresses listed in project fields like 'owner' and 's3it_owner'"""
+        emails = set()
+        for project in self.keystone.projects.list():
+            if not project.enabled:
+                continue
+            for attr in ['owner_email', 'contact_email', 's3it_owner_email']:
+                try:
+                    emails.add(getattr(project, attr))
+                except AttributeError:
+                    pass
+        return list(emails)
