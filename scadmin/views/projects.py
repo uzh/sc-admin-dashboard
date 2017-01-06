@@ -28,6 +28,7 @@ from flask import session, request, render_template, redirect, url_for, current_
 from flask.json import jsonify
 from  werkzeug.datastructures import MultiDict
 
+from scadmin import config
 from scadmin.auth import authenticated, authenticate_with_token
 from scadmin.models.projects import Projects, Project
 from scadmin.models.users import Users
@@ -108,7 +109,7 @@ def show_project(project_id):
         except Exception as ex:
             data['error'] += "Error setting grant to user '%s': %s\n" % (form.uid.data, ex)
 
-            
+
     try:
         if data['project']:
             data['users'] = data['project'].members()
