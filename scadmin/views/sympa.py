@@ -41,10 +41,9 @@ def list_users():
     ml = ML()
 
     all_users = scusers.list_users(project_admins=True)
-    users_email = [u['email'] for u in all_users] + [i[1] for i in config.SYMPA_EMAIL_MAPPINGS]
+    users_email = [u['email'] for u in all_users] + [i[1] for i in config.SYMPA_EMAIL_MAPPINGS if i[1]]
 
-    missing_email, exceeding = ml.missing_and_exceeding([u['email'] for u in all_users])
-
+    missing_email, exceeding = ml.missing_and_exceeding(users_email)
     missing = [u for u in all_users if u['email'] in missing_email]
 
     form.email_add.choices = [(i,i) for i in missing_email]

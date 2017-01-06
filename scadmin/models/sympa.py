@@ -65,7 +65,7 @@ class ML:
 
         if allusers:
             subscribers.extend([i[0] for i in config.SYMPA_EMAIL_MAPPINGS])
-            
+
         return subscribers
 
     def missing_and_exceeding(self, users):
@@ -74,7 +74,7 @@ class ML:
         missing = set(users).difference(subscribers)
         exceeding = set(subscribers).difference(users)
         return missing, exceeding
-    
+
     def add(self, users, quiet=True):
         """Add all email addresses listed in `users to the mailing list.
 

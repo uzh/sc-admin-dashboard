@@ -99,5 +99,6 @@ USE_SYMPA = False
 ##   whenever we try to add 'foo.bar@uzh.ch'
 
 # SYMPA_EMAIL_MAPPINGS = [
-# (,),
+    # ('SC email address', 'mailing list email address'),
+    # ('SC email address', None), # user that shouldn't be subscribed to the ML
 # ]
