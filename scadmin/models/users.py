@@ -54,13 +54,17 @@ class Users:
         users = []
         
         assignments = self.list()
-        projects = {p.id: p for p in self.keystone.projects.list()}
+        try:
+            projects = {p.id: p for p in self.keystone.projects.list()}
+        except Forbidden:
+            projects = None
         for uid in assignments:
             user = self.keystone.users.get(uid)
             if user.domain_id == 'default':
                 roles = assignments.get(uid)
-                for role in roles:
-                    role['project_name'] = projects[role['project']].name
+                if projects:
+                    for role in roles:
+                        role['project_name'] = projects[role['project']].name
                 u = {'id':uid,
                      'email':user.email,
                      'roles': roles}
@@ -128,15 +132,23 @@ class Users:
 
         u['roles'] = roles = []
         rolenames  = {r.id: r.name for r in self.keystone.roles.list()}
-        projects = {p.id: p for p in self.keystone.projects.list()}
+        try:
+            projects = {p.id: p for p in self.keystone.projects.list(user=uid)}
+        except Forbidden:
+            projects = {}
         for role in self.keystone.role_assignments.list(user=uid):
             pid = role.scope['project']['id']
             rid = role.role['id']
-            roles.append({'project': pid,
-                     'project_name': projects[pid].name,
-                     'role': rid,
-                     'role_name': rolenames[rid],
-                     })
+            r = {'project': pid,
+                 'role': rid,
+                 'project_name': pid,
+                 'role_name': rolenames[rid],
+            }
+            if projects:
+                r['project_name'] = projects[pid].name
+                
+                
+            roles.append(r)
                  
         return u
 
