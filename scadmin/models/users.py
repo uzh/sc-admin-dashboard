@@ -34,6 +34,7 @@ from keystoneauth1.exceptions.http import Forbidden, NotFound as http_NotFound
 from collections import defaultdict
 
 import json
+import re
 
 class Users:
     def __init__(self):
@@ -51,11 +52,19 @@ class Users:
 
     def list_users(self, project_admins=False):
         users = []
-
-        for uid in set((u.user['id'] for u in self.keystone.role_assignments.list())):
+        
+        assignments = self.list()
+        projects = {p.id: p for p in self.keystone.projects.list()}
+        for uid in assignments:
             user = self.keystone.users.get(uid)
             if user.domain_id == 'default':
-                users.append({'id':uid, 'email':user.email})
+                roles = assignments.get(uid)
+                for role in roles:
+                    role['project_name'] = projects[role['project']].name
+                u = {'id':uid,
+                     'email':user.email,
+                     'roles': roles}
+                users.append(u)
 
         emails = [u['email'] for u in users]
 
@@ -75,17 +84,61 @@ class Users:
 
         return users
 
-    def search(self, username):
-        users = {uid:u for uid,u in self.list().items() if username in uid}
+    def search(self, regexp, email=False):
+        if email:
+            return self._search_full(regexp)
+        else:
+            return self._search_uid(regexp)
+
+    def _search_full(self, regexp):
+        try:
+            regexp = re.compile(regexp)
+            def match(user):
+                if regexp.match(user['id']) or \
+                   regexp.match(user['email']):
+                    return True
+                else:
+                    return False
+        except re.error:
+            def match(user):
+                return regexp in user['id'] or regexp in user['email']
+
+        users = {u['id']:u for u in self.list_users() if match(u)}
         return users
 
+    def _search_uid(self, regexp):
+        try:
+            regexp = re.compile(regexp)
+            def match(uid):
+                if regexp.match(uid):
+                    return True
+                else:
+                    return False
+        except re.error:
+            def match(uid):
+                return regexp in uid
+        return {uid:{'roles': u} for uid, u in self.list().items() if match(uid)}
+    
     def get(self, uid):
         try:
             user = self.keystone.users.get(uid)
+            u = user.to_dict()
         except http_NotFound as ex:
             raise NotFound('User %s not found' % uid)
 
-        return user.to_dict()
+        u['roles'] = roles = []
+        rolenames  = {r.id: r.name for r in self.keystone.roles.list()}
+        projects = {p.id: p for p in self.keystone.projects.list()}
+        for role in self.keystone.role_assignments.list(user=uid):
+            pid = role.scope['project']['id']
+            rid = role.role['id']
+            roles.append({'project': pid,
+                     'project_name': projects[pid].name,
+                     'role': rid,
+                     'role_name': rolenames[rid],
+                     })
+                 
+        return u
 
     def admin_emails(self):
         """List all email addresses listed in project fields like 'owner' and 's3it_owner'"""

@@ -190,7 +190,11 @@ def quota(project_id):
 def search_user():
     users = Users()
     uid = request.args.get('search')
-    if uid:
+    email = request.args.get('email', '')
+
+    if uid and email.lower() in ['1', 'yes', 'on']:
+        return jsonify(users.search(uid, email=True))
+    elif uid:
         return jsonify(users.search(uid))
     else:
         return jsonify(users.list())

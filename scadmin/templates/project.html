@@ -4,16 +4,26 @@
 {% block maincontent %}
 <script type="text/javascript">
   function getUserDetail(){
-  $.get("{{url_for('main.get_user', uid='')}}"+$("#uid").val(), function(data){
-    if(data.id == null){
-      $("#user-detail").html("No user '"+ $("#uid").val() + "' found");
-    }else{
-      $("#user-detail").html("\
-<table class='table'>\
+      $.get("{{url_for('main.get_user', uid='')}}"+$("#uid").val(), function(data){
+          if(data.id == null){
+              $("#user-detail").html("No user '"+ $("#uid").val() + "' found");
+          }else{
+              var userdata = "<table class='table'>\
 <tbody>\
 <tr><th style='border-top: 0px'>user id</th><td style='border-top: 0px'>"+data.id+"</td></tr>\
-<tr><th style='border-top: 0px'>email</th><td style='border-top: 0px'>"+data.email+"</td></tr>\
-</table>");
+<tr><th style='border-top: 0px'>email</th><td style='border-top:0px'>"+data.email+"</td></tr>"
+              userdata += "<tr><th  style='border-top: 0px'>projects</th><td>"
+              for (i=0; i<data.roles.length; i++){
+                  var pname = data.roles[i].project_name
+                  var pid = data.roles[i].project
+                  var role = data.roles[i].role_name
+                  userdata += '<a href="'+pid+'">' + pname + '</a>'
+                  userdata += " (" + role + ")<br />"
+              }
+                               
+              userdata += "</tbody></table>"
+              $("#user-detail").html(userdata)
+
     }
   });
   }
@@ -90,7 +100,7 @@
     <div class="col-xs-1">
       <input type="button" class="btn" onclick="getUserDetail()" value="Show user"></input>
     </div>
-    <div id="user-detail" class="col-xs-3">
+    <div id="user-detail" class="col-xs-6">
 
     </div>
   </div>
