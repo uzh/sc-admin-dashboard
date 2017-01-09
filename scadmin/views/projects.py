@@ -145,14 +145,16 @@ def quota(project_id):
             try:
                 updated = quota.set(form.data)
                 # Build updated message.
+            except Exception as ex:
+                error += "Error while updating quota: %s\n" % ex
+            try:
                 msg = []
                 for qtype, qvalue in updated.items():
                     for key, values in qvalue.items():
-                        msg.append("%s: Update %s %d -> %d" % (
+                        msg.append("%s: Update %s %s -> %s" % (
                             qtype.upper(), key, values[0], values[1]))
             except Exception as ex:
-                error += "Error while updating quota: %s\n" % ex
-
+                error += "Error while writing quota message: %s\n" % ex
             try:
                 # Update project
                 curdate = datetime.now().strftime('(%Y-%d-%m)')
