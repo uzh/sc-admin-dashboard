@@ -64,7 +64,7 @@ class BytesField(IntegerField):
                  errors=str.join('\n', self.errors),
                  extra=str.join(' ', ['%s="%s"' % (k,v) for k,v in kwargs.items()]))
 
-        
+
         javascript = '''<script type="text/javascript">
 $(document).ready(function(){registerConverter('#%s')})
 </script>''' % self.id
@@ -84,8 +84,8 @@ def b_to_human(value):
         if value > threshold:
             return "%.2f %s" % (value/threshold, unit)
     return "%d B" % value
-    
-    
+
+
 class SetQuotaForm(FlaskForm):
     c_instances = S3ITField('Nr. of Instances')
     c_cores = S3ITField('Nr. of vCores')
@@ -108,9 +108,10 @@ class SetQuotaForm(FlaskForm):
     submit = SubmitField('Set quota')
 
     def validate_c_ram(form, field):
-        if field.data != 4*2**30*form.c_cores.data:
+        diff = field.data - 4*2**30*form.c_cores.data
+        if float(diff)/field.data > 0.01:
             raise validators.ValidationError(
-                "Ram should be 4 GiB x nr.vcores, in this case: %s instead of %s" % (b_to_human(4*2**30*form.c_cores.data), b_to_human(field.data)))
+                "Ram should be 4 GiB x nr.vcores, in this case: %s (%s) instead of %s" % (b_to_human(4*2**30*form.c_cores.data), 4*2**30*form.c_cores.data, b_to_human(field.data)))
 
     def validate_n_port(form, field):
         if field.data < form.c_instances.data:
