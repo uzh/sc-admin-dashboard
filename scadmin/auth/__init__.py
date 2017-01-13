@@ -135,7 +135,11 @@ def login():
     form = LoginForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        authenticate_with_password(form.username.data, form.password.data)
+        try:
+            authenticate_with_password(form.username.data, form.password.data)
+        except Unauthorized:
+            error="Wrong login/password combination. Please try again"
+            return render_template('auth/login.html', form=form, error=error)
         return redirect(url_for('main.list_projects'))
     return render_template('auth/login.html', form=form)
 
