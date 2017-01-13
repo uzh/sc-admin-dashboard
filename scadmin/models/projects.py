@@ -23,11 +23,13 @@ __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
 from flask import session, current_app as app
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
+import re
 
 from scadmin.auth import get_session
 from scadmin.exceptions import InsufficientAuthorization
 from scadmin import config
+from scadmin.utils import to_bib
 
 from keystoneclient.v3 import client as keystone_client
 from keystoneauth1.exceptions.http import Forbidden
@@ -92,6 +94,88 @@ class Project:
         except AttributeError:
             app.logger.info("quota_history property not present in project %s", self.project.name)
             self.keystone.projects.update(self.project, quota_history=history)
+
+    def history(self):
+        """Returns an ordered dictionary {
+        'YYYY-MM-DD': {'msg': "commit message",
+                       'services': {
+                           '<service>': {'<type>': (<old>, <new>, <oldunit>, <newunit>)}}
+                      },
+        }"""
+        quota_history = OrderedDict()
+        remsg = re.compile('\((?P<date>[0-9]{4}-[0-9]{2}-[0-9]{2})\) *(?P<msg>.*)')
+        requotaline = re.compile('(?P<service>NEUTRON|SWIFT|CINDER[^:]*|NOVA): (?P<update>.*)')
+        requota = re.compile('((?P<type>[^:]+): )?(?P<new>[+-]*[0-9]+) *(?P<unit>GiB|TiB)? *\((?P<delta>[+-][0-9]+) *(?P<oldunit>GiB|TiB)?\)')
+        requota2 = re.compile('Update (?P<type>[^:]+) (?P<old>[0-9]+) -> (?P<new>[0-9]+)')
+        for line in self.quota_history.splitlines():
+            if not remsg.match(line):
+                continue
+            m = remsg.search(line)
+            date = m.group('date')
+            msg = m.group('msg')
+            if date not in quota_history:
+                quota_history[date] = {'msg': '', 'services': OrderedDict()}
+            curdata = quota_history[date]['services']
+
+            m = requotaline.match(msg)
+            if not m:
+                quota_history[date]['msg'] = msg
+                continue
+            service = m.group('service')
+            if service not in curdata:
+                curdata[service] = OrderedDict()
+            d = curdata[service]
+            for update in m.group('update').split(','):
+                u = requota.search(update.strip())
+                if not u:
+                    continue
+                new, delta = int(u.group('new')), int(u.group('delta'))
+                old = new - delta
+                oldunit = u.group('unit')
+                newunit = oldunit
+                if newunit is None:
+                    newunit = oldunit = ''
+
+                typ = u.group('type')
+                if typ in ['ram', 'bytes', 'gigabytes', 'gigabytes_vhp']:
+                    if typ == 'ram':
+                        old *= 2**20
+                        new *= 2**20
+                    elif typ.startswith('gigabytes'):
+                        old *= 2**30
+                        new *= 2**30
+                    if not newunit:
+                        old, oldunit = to_bib(old)
+                        new, newunit = to_bib(new)
+                if not typ:
+                    typ = 'default'
+                if typ in d:
+                    typidx = 1
+                    while '%s %d' % (typ, typidx) in d:
+                        typidx += 1
+                    # This usually measn that there were two quota updates in the same day.
+                    typ = "%s (%d)" % (typ, typidx)
+                d[typ] = (old, new, oldunit, newunit)
+            # Also check if the quota history line matches the new regexp
+            u = requota2.search(m.group('update'))
+            if u:
+                # Note: these values are absolute, so we might want to
+                # convert them to human-readable.
+                old, new = int(u.group('old')), int(u.group('new'))
+                oldunit = newunit = ''
+                typ = u.group('type')
+                if typ in ['ram', 'bytes', 'gigabytes', 'gigabytes_vhp']:
+                    if typ == 'ram':
+                        old *= 2**20
+                        new *= 2**20
+                    elif typ.startswith('gigabytes'):
+                        old *= 2**30
+                        new *= 2**30
+                    old, oldunit = to_bib(old)
+                    new, newunit = to_bib(new)
+                d[typ] = (old, new, oldunit, newunit)
+            
+        return quota_history
 
 class Projects:
     def __init__(self):

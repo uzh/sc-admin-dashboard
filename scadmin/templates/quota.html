@@ -13,6 +13,43 @@ Current roles:
   {% endfor %}
 </ul>
 
+
+<h2>Quota history</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>date</th>
+      <th>service</th>
+      <th>quota  type</th>
+      <th>previous value</th>
+      <th>updated value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for date,update in project.history().items()|reverse %}
+    {% set curstyle = loop.cycle("active", "") %}
+    <tr class="{{curstyle}}">
+      <th>{{date}}</th>
+      <td colspan="4">
+        <b>{{update.msg}}</b>
+      </td>
+    </tr>
+      {% for sname, sdata in update.services.items() %}
+        {% for typ, (old, new, oldunit, newunit) in sdata.items() %}
+    <tr class="{{curstyle}}">
+      <td></td>
+      <td>{{sname}}</td>
+      <td>{{typ}}</td>
+      <td>{{old|round(2)}} {{oldunit}}</td>
+      <td>{{new|round(2)}} {{newunit}}</td>
+    </tr>
+        {% endfor %}
+    {% endfor %}
+  {% endfor %}
+  </tbody>
+</table>
+
 <form action="" method="post" class="form" role="form">
   {{ form.hidden_tag() }}
   <h2>Compute (nova)</h2>

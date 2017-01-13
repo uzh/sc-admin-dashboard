@@ -184,3 +184,4 @@ class Quota:
         swiftclient.post_account(url=self.storage_url,
                                  token=token,
                                  headers={'x-account-meta-quota-bytes': str(quota['bytes'])})
+
