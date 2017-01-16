@@ -156,13 +156,14 @@ def quota(project_id):
             except Exception as ex:
                 error += "Error while writing quota message: %s\n" % ex
             try:
-                # Update project
-                curdate = datetime.now().strftime('(%Y-%d-%m)')
-                history = ["%s %s updated quota" % (curdate, session['auth']['user_id'])]
-                if form.comment.data:
-                    history.append("%s %s" % (curdate, form.comment.data))
-                history.extend(["%s %s" % (curdate, line) for line in msg])
-                project.add_to_history(str.join('\n', history))
+                if not error:
+                    # Update project
+                    curdate = datetime.now().strftime('(%Y-%m-%d)')
+                    history = ["%s %s updated quota" % (curdate, session['auth']['user_id'])]
+                    if form.comment.data:
+                        history.append("%s %s" % (curdate, form.comment.data))
+                    history.extend(["%s %s" % (curdate, line) for line in msg])
+                    project.add_to_history(str.join('\n', history))
             except Exception as ex:
                 app.logger.error("Error while updating history of project %s: %s",
                                   project.name, ex)
