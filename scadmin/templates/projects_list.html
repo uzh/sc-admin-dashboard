@@ -9,6 +9,37 @@
   {% endfor %}
 </ul>
 
+{% if auth.regular_member %}
+<div class="alert alert-danger">
+  You don't have a privileged role on this project. Please click on the "set
+  active" link next to one of the projects you have a privileged role
+  (usermanager, project_admin or admin)
+</div>
+{% endif %}
+
+{% if 'usermanager' in auth.roles %}
+<div class="alert alert-info">
+  The <b>usermanager</b> role allows you to:
+  <ul>
+    <li>Create new projects</li>
+    <li>List all the projects (not only projects you are member of</li>
+    <li>Manage the quota of any project</li>
+    <li>Add/remove any user to any project</li>
+    <li>Check mailing list users</li>
+  </ul>
+</div>
+{% endif %}
+
+{% if 'project_admin' in auth.roles %}
+<div class="alert alert-info">
+  The <b>project_admin</b> role allows you to:
+  <ul>
+    <li>List all users in project {{project.name}}</li>
+    <li>Add/remove any user from project {{project.name}}</li>
+  </ul>
+</div>
+{% endif %}
+
 
 <h1>List of projects</h1>
 
@@ -28,9 +59,14 @@
   </thead>
   <tbody>
     {% for project in projects %}
-    <tr>
+    <tr>      
       <td class="sortable normal_column">
-        <a href="{{url_for('main.show_project', project_id=project.p.id)}}">{{ project.p.name }}</a>
+        {% if not auth.regular_member %}
+        <a href="{{url_for('main.show_project',
+                 project_id=project.p.id)}}">{{ project.p.name }}</a>
+        {% else %}
+        {{ project.p.name }}
+        {% endif %}
       </td>
       <td class="sortable normal_column">
         {{ project.p.owner }}
