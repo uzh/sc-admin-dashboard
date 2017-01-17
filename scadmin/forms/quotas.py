@@ -22,7 +22,7 @@
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
 
-from wtforms import Form, StringField, IntegerField, SubmitField, validators
+from wtforms import Form, StringField, IntegerField, SubmitField, validators, BooleanField
 from flask_wtf import FlaskForm
 from scadmin import config
 from wtforms.widgets.core import HTMLString
@@ -105,11 +105,13 @@ class SetQuotaForm(FlaskForm):
     s_bytes = BytesField('Swift bytes')
 
     comment = StringField("Comment", [validators.DataRequired()])
+
+    force = BooleanField("Bypass validation")
     submit = SubmitField('Set quota')
 
     def validate_c_ram(form, field):
         diff = field.data - 4*2**30*form.c_cores.data
-        if float(diff)/field.data > 0.01:
+        if not form.force.data and float(diff)/field.data > 0.01:
             raise validators.ValidationError(
                 "Ram should be 4 GiB x nr.vcores, in this case: %s (%s) instead of %s" % (b_to_human(4*2**30*form.c_cores.data), 4*2**30*form.c_cores.data, b_to_human(field.data)))
 

@@ -64,20 +64,20 @@ Current roles:
 
   <h2>Network (neutron)</h2>
   <div class="form-group row">
-      {{ form.n_port(class="form-control") }}
+    {{ form.n_port(class="form-control") }}
 
-      {{ form.n_network(class="form-control") }}
+    {{ form.n_network(class="form-control") }}
 
-      {{ form.n_subnet(class="form-control") }}
+    {{ form.n_subnet(class="form-control") }}
   </div>
 
   <!-- neutron, second row -->
   <div class="form-group row">
-      {{ form.n_security_group(class="form-control") }}
+    {{ form.n_security_group(class="form-control") }}
 
-      {{ form.n_floatingip(class="form-control") }}
+    {{ form.n_floatingip(class="form-control") }}
 
-      {{ form.n_router(class="form-control") }}
+    {{ form.n_router(class="form-control") }}
   </div>
   
 
@@ -109,19 +109,27 @@ Current roles:
     {% if form.comment.errors %}
     <div class="col-xs-10 has-error">
       {% else %}
-    <div class="col-xs-10">
-    {% endif %}
-      {{form.comment(class="form-control")}}
-      <span class="help-block">{% for line in form.comment.errors %}{{line}}<br />{% endfor %}</span>
+      <div class="col-xs-10">
+        {% endif %}
+        {{form.comment(class="form-control")}}
+        <span class="help-block">{% for line in form.comment.errors %}{{line}}<br />{% endfor %}</span>
+      </div>
     </div>
-  </div>
-  
-  <div class="form-group row">
-    <div class="col-xs-10">
-      {{form.submit(class="btn btn-default")}}
+    
+    <div class="form-group row">
+      <div class="control-group col-xs-2">
+      <label for="force" class="col-form-label">
+        Bypass RAM/vcores ratio validation:
+      </label>
+      &nbsp;{{form.force()}}
+      </div>
+      <div class="control-group col-xs-6">
+        {{form.submit(class="btn btn-default")}}
+      </div>
     </div>
   </div>
 </form>
-</div>
+
+
 
 {% endblock maincontent %}
