@@ -75,12 +75,15 @@ Current roles:
   <div class="form-group row">
     {{ form.n_security_group(class="form-control") }}
 
-    {{ form.n_floatingip(class="form-control") }}
+    {{ form.n_security_group_rule(class="form-control") }}
 
+    {{ form.n_floatingip(class="form-control") }}
+  </div>
+  
+  <div class="form-group row">
     {{ form.n_router(class="form-control") }}
   </div>
   
-
   <h2>Block Storage (cinder)</h2>
   <div class="form-group row">
 

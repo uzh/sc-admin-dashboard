@@ -96,6 +96,7 @@ class SetQuotaForm(FlaskForm):
     n_network = S3ITField('Number of networks')
     n_subnet = S3ITField('Number of subnets')
     n_security_group = S3ITField('Number of security groups')
+    n_security_group_rule = S3ITField('Number of security group rules')
     n_floatingip = S3ITField('Number of floating IPs')
     n_router = S3ITField('Number of routers')
 
