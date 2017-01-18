@@ -62,7 +62,10 @@ class Project:
                     'faculty',
                     'description',
                     'name']:
-            return getattr(self.project, attr)
+            try:
+                return getattr(self.project, attr)
+            except AttributeError:
+                return ''
         else:
             return object.__getattr__(self, attr)
 
@@ -174,7 +177,7 @@ class Project:
                     old, oldunit = to_bib(old)
                     new, newunit = to_bib(new)
                 d[typ] = (old, new, oldunit, newunit)
-            
+
         return quota_history
 
 class Projects:
