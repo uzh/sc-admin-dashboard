@@ -39,6 +39,20 @@ def list_users():
 
     scusers = Users()
     ml = ML()
+    try:
+        ml.login()
+    except Exception as ex:
+        error = "Unable to access Sympa mailing list server: %s" % ex
+        return render_template('ml_users.html',
+                               error=error,
+                               scusers=[],
+                               missing=[],
+                               exceeding=[],
+                               ml=ml,
+                               form=form,
+                               sy_user=config.SYMPA_USERNAME,
+        )
+        
 
     all_users = scusers.list_users(project_admins=True)
     users_email = [u['email'] for u in all_users] + [i[1] for i in config.SYMPA_EMAIL_MAPPINGS if i[1]]
@@ -60,7 +74,7 @@ def list_users():
             info2, err2 = ml.remove(to_remove)
             info += info2
             err += err2
-        
+
         missing_email, exceeding = ml.missing_and_exceeding([u['email'] for u in all_users])
         missing = [u for u in all_users if u['email'] in missing_email]
 

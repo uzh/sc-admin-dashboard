@@ -40,8 +40,6 @@ class ML:
         self.br.session.verify = False
         app.logger.warning("Disabling SSL verification to access %s", self.url_base)
 
-        self.login()
-
     def login(self):
         """Login to the mailing list"""
         self.br.open(self.url_base)
@@ -52,16 +50,22 @@ class ML:
         form['passwd'] = config.SYMPA_PASSWORD
 
         self.br.submit_form(form)
+        self.logged_in = True
 
+    def open(self, url):
+        if not self.logged_in:
+            self.login()
+        self.br.open(url)
+        
     def list(self, allusers=False):
         """Return a list of email addresses subscribed to the mailing list"""
         subscribers = []
-        self.br.open(self.url_review)
+        self.open(self.url_review)
 
         for row in self.br.find_all('tr'):
             email = row.find('a').text
             if email and email.strip():
-                subscribers.append(email)
+                subscribers.append(email.lower())
 
         if allusers:
             subscribers.extend([i[0] for i in config.SYMPA_EMAIL_MAPPINGS])
@@ -69,7 +73,7 @@ class ML:
         return subscribers
 
     def missing_and_exceeding(self, users):
-        users = [u for u in users if u and u.strip()]
+        users = [u.lower() for u in users if u and u.strip()]
         subscribers = self.list(allusers=True)
         missing = set(users).difference(subscribers)
         exceeding = set(subscribers).difference(users)
@@ -80,7 +84,7 @@ class ML:
 
         Returns two lists `info`, `err` containins info and error messages
         """
-        self.br.open(self.url_add)
+        self.open(self.url_add)
 
         form = self.br.get_forms()[1]
         form['dump'] = str.join('\n', [u for u in users if u and  '@' in u])
@@ -104,7 +108,7 @@ class ML:
 
         Returns two lists `info`, `err` containins info and error messages
         """
-        self.br.open(self.url_remove)
+        self.open(self.url_remove)
 
         form = self.br.get_forms()[4]
         form['email'].value = users
