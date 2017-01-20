@@ -39,6 +39,7 @@ class ML:
         self.br = robobrowser.RoboBrowser(user_agent='Chrome', parser='html.parser')
         self.br.session.verify = False
         app.logger.warning("Disabling SSL verification to access %s", self.url_base)
+        self.logged_in = False
 
     def login(self):
         """Login to the mailing list"""
