@@ -37,6 +37,7 @@ from . import sympa_bp
 def list_users():
     form = SympaAddRemove(request.form)
 
+    info, err = [], []
     scusers = Users()
     ml = ML()
     try:
@@ -65,7 +66,6 @@ def list_users():
 
     if request.method == 'POST' and form.validate():
         to_add = [f.data for f in form.email_add if f.checked]
-        info, err = [], []
         if to_add:
             info, err = ml.add(to_add)
 
@@ -94,6 +94,8 @@ def list_users():
     return render_template('ml_users.html',
                            scusers=scusers,
                            missing=missing,
+                           messages=info,
+                           error=str.join('\n<br />', err),
                            exceeding=exceeding,
                            ml=ml,
                            form=form,

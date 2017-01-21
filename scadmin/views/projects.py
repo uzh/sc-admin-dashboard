@@ -80,6 +80,7 @@ def show_project(project_id):
         'project_id': project_id,
         'form': form,
         'error': '',
+        'messages': [],
     }
 
     try:
@@ -107,6 +108,8 @@ def show_project(project_id):
                 info, err = ml.add([user['email']])
                 if err:
                     data['error'] += 'Error while adding user to mailing list: %s\n' % err
+                if info:
+                    data['messages'] += info
         except Exception as ex:
             data['error'] += "Error setting grant to user '%s': %s\n" % (form.uid.data, ex)
 

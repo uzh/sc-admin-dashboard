@@ -99,7 +99,27 @@ class ML:
         if self.br.find(id='ephemeralMsg'):
             info.extend(self.br.find(id='ephemeralMsg').text.strip().splitlines())
         if self.br.find(id='ErrorMsg'):
-            err.extend(self.br.find(id='ErrorMsg').text.strip().splitlines())
+            # S3IT issue3567: when adding an user to the mailing list
+            # Sympa is returning an error, but for us this is not
+            # really an error, rather an informational message, as we
+            # will get this "error" every time we add an user to more
+            # than one tenant. Let's therefore add it to info instead.
+            #
+            # To identify if this is actually an error or not, we need
+            # to see if the line "is already subscribed to the list"
+            # is present in the error message, and check if this is
+            # the case for *all* the email addresses
+
+            errorlines = [i.strip() for i in self.br.find(id='ErrorMsg').text.strip().splitlines()]
+            for line in errorlines[:]:
+                if 'is already subscribed to the list' in line:
+                    info.append(line)
+                    errorlines.remove(line)
+            # If all the users were already subscribed, then the
+            # errorlines list will only contain one line. In all other
+            # cases, we extend the err list.
+            if errorlines != ['ERROR (add)  -']:
+                err.extend()
 
         return info, err
 
