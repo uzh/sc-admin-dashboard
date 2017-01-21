@@ -92,11 +92,12 @@ class Project:
 
     def add_to_history(self, history):
         try:
-            oldprop = self.project.quota_history
-            self.keystone.projects.update(self.project, quota_history=oldprop.strip() + '\n' + history)
-        except AttributeError:
-            app.logger.info("quota_history property not present in project %s", self.project.name)
-            self.keystone.projects.update(self.project, quota_history=history)
+            newhistory = self.project.quota_history.strip() + '\n' + history
+        except AttributeError: 
+            newhistory = history
+
+        self.keystone.projects.update(self.project, quota_history=newhistory)
+        self.project.quota_history = newhistory
 
     def history(self):
         """Returns an ordered dictionary {
@@ -106,7 +107,7 @@ class Project:
                       },
         }"""
         quota_history = OrderedDict()
-        remsg = re.compile('\((?P<date>[0-9]{4}-[0-9]{2}-[0-9]{2})\) *(?P<msg>.*)')
+        remsg = re.compile('\((?P<date>[0-9]{4}-[0-9]{2}-[0-9]{2}(\s*[0-9]{2}:[0-9]{2})?)\) *(?P<msg>.*)')
         requotaline = re.compile('(?P<service>NEUTRON|SWIFT|CINDER[^:]*|NOVA): (?P<update>.*)')
         requota = re.compile('((?P<type>[^:]+): )?(?P<new>[+-]*[0-9]+) *(?P<unit>GiB|TiB)? *\((?P<delta>[+-][0-9]+) *(?P<oldunit>GiB|TiB)?\)')
         requota2 = re.compile('Update (?P<type>[^:]+) (?P<old>[0-9]+) -> (?P<new>[0-9]+)')
@@ -116,8 +117,14 @@ class Project:
             m = remsg.search(line)
             date = m.group('date')
             msg = m.group('msg')
-            if date not in quota_history:
-                quota_history[date] = {'msg': '', 'services': OrderedDict()}
+            if date in quota_history:
+                for i in range(1, 100):
+                    newdate = "%s (%d)" % (date, i)
+                    if newdate not in quota_history:
+                        date = newdate
+                        break
+            quota_history[date] = {'msg': '', 'services': OrderedDict()}
+
             curdata = quota_history[date]['services']
 
             m = requotaline.match(msg)

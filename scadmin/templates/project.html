@@ -89,7 +89,7 @@
   </tbody>
 </table>
 
-<form action="" method="post" class="form" role="form">
+<form action="{{url_for('main.show_project', project_id=project_id)}}" method="post" class="form" role="form">
   {{ form.hidden_tag() }}
   <h2>Add user to project</h2>
   <div class="form-group row">

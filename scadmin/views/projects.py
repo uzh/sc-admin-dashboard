@@ -61,13 +61,19 @@ def set_active_project(project_id):
 @main_bp.route('create-project', methods=['GET', 'POST'])
 @authenticated
 def create_project():
-    form = CreateProjectForm(request.form)
+    data = {
+        'auth': session['auth'],
+        'error': [],
+        'info': [],
+    }
+
+    form = data['form'] = CreateProjectForm(request.form)
     if request.method == 'POST' and form.validate():
         # create project
         projects = Projects()
         project = projects.create(form)
         return redirect('project/%s' % project.id)
-    return render_template('create-project.html', form=form)
+    return render_template('create-project.html', **data)
 
 
 @main_bp.route('project/<project_id>', methods=['GET', 'POST'])
@@ -79,10 +85,17 @@ def show_project(project_id):
         'project': None,
         'project_id': project_id,
         'form': form,
-        'error': '',
-        'messages': [],
+        'error': [],
+        'info': [],
     }
-
+    reqerror = request.args.get('error')
+    if reqerror:
+        data['error'].append(reqerror)
+        
+    reqinfo = request.args.get('info')
+    if reqinfo:
+        data['info'].append(reqinfo)
+    
     try:
         data['project'] =  Project(project_id)
     except InsufficientAuthorization:
@@ -91,7 +104,7 @@ def show_project(project_id):
             authenticate_with_token(project_id=project_id)
             data['project'] = Project(project_id)
         except InsufficientAuthorization:
-            data['error'] += 'Unauthorized: unable to get info on project %s\n' % project_id
+            data['error'].append('Unauthorized: unable to get info on project %s\n' % project_id)
 
     if request.method == 'POST' and form.validate():
         try:
@@ -99,7 +112,7 @@ def show_project(project_id):
             user = users.get(form.uid.data)
             data['project'].grant(form.uid.data, form.role.data)
 
-            data['message'] = 'User %s added to project'
+            data['info'].append('User %s (%s) added to project' % (user['id'], user['email']))
 
             # Add user to mailing list
             if config.USE_SYMPA:
@@ -107,11 +120,12 @@ def show_project(project_id):
                 ml.login()
                 info, err = ml.add([user['email']])
                 if err:
-                    data['error'] += 'Error while adding user to mailing list: %s\n' % err
+                    data['error'].append('Error while adding user to mailing list\n')
+                    data['error'] += err
                 if info:
-                    data['messages'] += info
+                    data['info'] += info
         except Exception as ex:
-            data['error'] += "Error setting grant to user '%s': %s\n" % (form.uid.data, ex)
+            data['error'].append("Error setting grant to user '%s': %s\n" % (form.uid.data, ex))
 
 
     try:
@@ -129,68 +143,71 @@ def revoke_grant(project_id):
     role = request.args.get('role')
     project = Project(project_id)
     project.revoke(uid, role)
-    return redirect('project/%s' % project_id)
+    return redirect(url_for('main.show_project',
+                            project_id=project_id,
+                            info="Role %s revoked from user %s" % (role, uid)))
+
 
 @main_bp.route('quota/<project_id>', methods=['GET', 'POST'])
 @authenticated
 def quota(project_id):
-    quota = Quota(project_id)
-    project = Project(project_id)
-    error = ''
-    msg = None
+    data = {
+        'auth': session['auth'],
+        'error': [],
+        'info': [],
+        'form': None,
+    }
+    data['quota'] = Quota(project_id)
+    project = data['project'] = Project(project_id)
 
     if request.method == 'POST':
-        form = SetQuotaForm(request.form)
-        if not quota.has_swift():
-            del form.s_bytes
+        data['form'] = SetQuotaForm(request.form)
+        if not data['quota'].has_swift():
+            del data['form'].s_bytes
 
-        if form.validate():
+        if data['form'].validate():
             # Update quota
             try:
-                updated = quota.set(form.data)
+                updated = data['quota'].set(data['form'].data)
                 # Build updated message.
             except Exception as ex:
-                error += "Error while updating quota: %s\n" % ex
+                data['error'].append("Error while updating quota: %s\n" % ex)
             try:
-                msg = []
+                h_update = []
                 for qtype, qvalue in updated.items():
                     for key, values in qvalue.items():
-                        msg.append("%s: Update %s %s -> %s" % (
+                        h_update.append("%s: Update %s %s -> %s" % (
                             qtype.upper(), key, values[0], values[1]))
             except Exception as ex:
-                error += "Error while writing quota message: %s\n" % ex
+                data['error'].append("Error while writing quota message: %s\n" % ex)
             try:
-                if not error:
+                if not data['error']:
                     # Update project
-                    curdate = datetime.now().strftime('(%Y-%m-%d)')
+                    curdate = datetime.now().strftime('(%Y-%m-%d %H:%M)')
                     history = ["%s %s updated quota" % (curdate, session['auth']['user_id'])]
-                    if form.comment.data:
-                        history.append("%s %s" % (curdate, form.comment.data))
-                    history.extend(["%s %s" % (curdate, line) for line in msg])
+                    if data['form'].comment.data:
+                        history.append("%s %s" % (curdate, data['form'].comment.data))
+                    history.extend(["%s %s" % (curdate, line) for line in h_update])
+                    data['info'].extend(h_update)
                     project.add_to_history(str.join('\n', history))
             except Exception as ex:
                 app.logger.error("Error while updating history of project %s: %s",
                                   project.name, ex)
-                error += 'Error while updating history: %s\n' % ex
+                data['error'].append('Error while updating history: %s\n' % ex)
             # set some message
-            quota = Quota(project_id)
-            form = SetQuotaForm(MultiDict(quota.to_dict()))
-            if not quota.has_swift():
-                del form.s_bytes
+            data['quota'] = Quota(project_id)
+            data['form'] = SetQuotaForm(MultiDict(data['quota'].to_dict()))
+            if not data['quota'].has_swift():
+                del data['form'].s_bytes
         else:
-            error += 'Some data is missing/wrong.'
+            data['error'].append('Some data is missing/wrong.')
     else:
-        form = SetQuotaForm(MultiDict(quota.to_dict()))
-        if not quota.has_swift():
-            del form.s_bytes
+        data['form'] = SetQuotaForm(MultiDict(data['quota'].to_dict()))
+        if not data['quota'].has_swift():
+            del data['form'].s_bytes
 
 
-    return render_template('quota.html',
-                           project=project,
-                           form=form,
-                           error=error,
-                           messages=msg,
-                           auth=session['auth'])
+    return render_template('quota.html', **data)
 
 @main_bp.route('user')
 @authenticated

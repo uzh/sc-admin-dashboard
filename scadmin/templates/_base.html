@@ -44,13 +44,15 @@
 
       {% if error %}
       <div class="alert alert-danger">
-        {{error}}
+        {% for msg in error %}
+        <p>{{msg}}</p>
+        {% endfor %}
       </div>
       {% endif %}
 
-      {% if messages %}
+      {% if info %}
       <div class="alert alert-info">
-        {% for msg in messages %}
+        {% for msg in info %}
         <p>{{msg}}</p>
         {% endfor %}
       </div>

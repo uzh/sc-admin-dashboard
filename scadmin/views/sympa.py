@@ -35,31 +35,31 @@ from . import sympa_bp
 @authenticated
 @has_role(['admin', 'usermanager'])
 def list_users():
-    form = SympaAddRemove(request.form)
+    data = {
+        'auth': session['auth'],
+        'error': [],
+        'info': [],
+        'missing': [],
+        'exceeding': [],
+        'sy_user': config.SYMPA_USERNAME,
+    }
+    form = data['form'] = SympaAddRemove(request.form)
 
-    info, err = [], []
-    scusers = Users()
-    ml = ML()
+    scusers = data['scusers'] = Users()
+    ml = data['ml'] = ML()
     try:
         ml.login()
     except Exception as ex:
-        error = "Unable to access Sympa mailing list server: %s" % ex
-        return render_template('ml_users.html',
-                               error=error,
-                               scusers=[],
-                               missing=[],
-                               exceeding=[],
-                               ml=ml,
-                               form=form,
-                               sy_user=config.SYMPA_USERNAME,
-        )
+        data['error'].append("Unable to access Sympa mailing list server: %s" % ex)
+        return render_template('ml_users.html', **data)
         
 
     all_users = scusers.list_users(project_admins=True)
     users_email = [u['email'] for u in all_users] + [i[1] for i in config.SYMPA_EMAIL_MAPPINGS if i[1]]
 
     missing_email, exceeding = ml.missing_and_exceeding(users_email)
-    missing = [u for u in all_users if u['email'] in missing_email]
+    data['exceeding'] = exceeding
+    missing = data['missing'] = [u for u in all_users if u['email'] in missing_email]
 
     form.email_add.choices = [(i,i) for i in missing_email]
     form.email_remove.choices = [(i,i) for i in exceeding]
@@ -80,24 +80,6 @@ def list_users():
 
         form.email_add.choices = [(i,i) for i in missing_email]
         form.email_remove.choices = [(i,i) for i in exceeding]
-        return render_template('ml_users.html',
-                               scusers=scusers,
-                               missing=missing,
-                               exceeding=exceeding,
-                               messages=info,
-                               error=str.join('\n<br />', err),
-                               ml=ml,
-                               form=form,
-                               sy_user=config.SYMPA_USERNAME,
-        )
+        return render_template('ml_users.html', **data)
 
-    return render_template('ml_users.html',
-                           scusers=scusers,
-                           missing=missing,
-                           messages=info,
-                           error=str.join('\n<br />', err),
-                           exceeding=exceeding,
-                           ml=ml,
-                           form=form,
-                           sy_user=config.SYMPA_USERNAME,
-    )
+    return render_template('ml_users.html', **data)
