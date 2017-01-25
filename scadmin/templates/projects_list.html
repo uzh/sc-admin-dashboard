@@ -17,6 +17,14 @@
 </div>
 {% endif %}
 
+{% if 'admin' in auth.roles %}
+<div class="alert alert-danger">
+  You have the role <b>admin</b> on this project. This is a very
+  powerful role, and must be used with caution. You should switch to
+  a project where you have the <b>usermanager</b> role instead.
+</div>
+{% endif %}
+
 {% if 'usermanager' in auth.roles %}
 <div class="alert alert-info">
   The <b>usermanager</b> role allows you to:
