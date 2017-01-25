@@ -111,30 +111,29 @@ class Project:
         requotaline = re.compile('(?P<service>NEUTRON|SWIFT|CINDER[^:]*|NOVA): (?P<update>.*)')
         requota = re.compile('((?P<type>[^:]+): )?(?P<new>[+-]*[0-9]+) *(?P<unit>GiB|TiB)? *\((?P<delta>[+-][0-9]+) *(?P<oldunit>GiB|TiB)?\)')
         requota2 = re.compile('Update (?P<type>[^:]+) (?P<old>[0-9]+) -> (?P<new>[0-9]+)')
+
+        
         for line in self.quota_history.splitlines():
             if not remsg.match(line):
                 continue
             m = remsg.search(line)
             date = m.group('date')
             msg = m.group('msg')
-            if date in quota_history:
-                for i in range(1, 100):
-                    newdate = "%s (%d)" % (date, i)
-                    if newdate not in quota_history:
-                        date = newdate
-                        break
-            quota_history[date] = {'msg': '', 'services': OrderedDict()}
+            if date not in quota_history:
+                quota_history[date] = {'msg': '', 'services': []}
 
             curdata = quota_history[date]['services']
 
             m = requotaline.match(msg)
-            if not m:
-                quota_history[date]['msg'] = msg
+            if not m and msg:
+                if quota_history[date]['msg']:
+                    quota_history[date]['msg'] += ('\n%s' % msg)
+                else:
+                    quota_history[date]['msg'] = msg
                 continue
             service = m.group('service')
-            if service not in curdata:
-                curdata[service] = OrderedDict()
-            d = curdata[service]
+            d = OrderedDict()
+            curdata.append((service, d))
             for update in m.group('update').split(','):
                 u = requota.search(update.strip())
                 if not u:

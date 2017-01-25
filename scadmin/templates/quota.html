@@ -32,10 +32,10 @@ Current roles:
     <tr class="{{curstyle}}">
       <th>{{date}}</th>
       <td colspan="4">
-        <b>{{update.msg}}</b>
+        <b>{{update.msg.splitlines()|join('<br />')|safe}}</b>
       </td>
     </tr>
-      {% for sname, sdata in update.services.items() %}
+      {% for sname, sdata in update.services %}
         {% for typ, (old, new, oldunit, newunit) in sdata.items() %}
     <tr class="{{curstyle}}">
       <td></td>
