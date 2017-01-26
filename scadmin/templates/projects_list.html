@@ -69,7 +69,10 @@
     {% for project in projects %}
     <tr>      
       <td class="sortable normal_column">
-        {% if not auth.regular_member %}
+        {% if 'project_admin' in auth.roles and project.p.id == curproject.id %}
+        <a href="{{url_for('main.show_project',
+                 project_id=project.p.id)}}">{{ project.p.name }}</a>
+        {% elif 'usermanager' in auth.roles or 'admin' in auth.roles %}
         <a href="{{url_for('main.show_project',
                  project_id=project.p.id)}}">{{ project.p.name }}</a>
         {% else %}
