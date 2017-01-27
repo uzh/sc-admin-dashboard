@@ -83,12 +83,20 @@ class Project:
         return users
 
     def grant(self, username, rolename):
-        role = self.keystone.roles.find(name=rolename)
-        self.keystone.roles.grant(role, user=username, project=self.project)
+        try:
+            role = self.keystone.roles.find(name=rolename)
+            self.keystone.roles.grant(role, user=username, project=self.project)
+        except Forbidden:
+            raise InsufficientAuthorization
+
 
     def revoke(self, username, rolename):
-        role = self.keystone.roles.find(name=rolename)
-        self.keystone.roles.revoke(role, user=username, project=self.project)
+        try:            
+            role = self.keystone.roles.find(name=rolename)
+            self.keystone.roles.revoke(role, user=username, project=self.project)
+        except Forbidden:
+            raise InsufficientAuthorization
+
 
     def add_to_history(self, history):
         try:
