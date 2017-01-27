@@ -142,10 +142,16 @@ def revoke_grant(project_id):
     uid = request.args.get('userid')
     role = request.args.get('role')
     project = Project(project_id)
-    project.revoke(uid, role)
+    try:
+        project.revoke(uid, role)
+    except InsufficientAuthorization:
+        return redirect(url_for('main.show_project',
+                                project_id=project_id,
+                                error="Insufficient permissions to revoke role '%s' from user '%s'" % (role, uid)))
+
     return redirect(url_for('main.show_project',
                             project_id=project_id,
-                            info="Role %s revoked from user %s" % (role, uid)))
+                            info="Role '%s' revoked from user '%s'" % (role, uid)))
 
 
 @main_bp.route('quota/<project_id>', methods=['GET', 'POST'])
