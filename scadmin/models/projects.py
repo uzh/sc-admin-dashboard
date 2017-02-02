@@ -47,7 +47,7 @@ class Project:
         try:
             self.project = self.keystone.projects.get(name_or_id)
         except Forbidden:
-            projects = self.keystone.projects.list(user=self.session.get_user_id())
+            projects = self.keystone.projects.list(user=self.session.get_user_id(), enabled=True)
             for project in projects:
                 if project.id == self.session.auth.project_id:
                     self.project = project
@@ -91,7 +91,7 @@ class Project:
 
 
     def revoke(self, username, rolename):
-        try:            
+        try:
             role = self.keystone.roles.find(name=rolename)
             self.keystone.roles.revoke(role, user=username, project=self.project)
         except Forbidden:
@@ -101,7 +101,7 @@ class Project:
     def add_to_history(self, history):
         try:
             newhistory = self.project.quota_history.strip() + '\n' + history
-        except AttributeError: 
+        except AttributeError:
             newhistory = history
 
         self.keystone.projects.update(self.project, quota_history=newhistory)
@@ -120,7 +120,7 @@ class Project:
         requota = re.compile('((?P<type>[^:]+): )?(?P<new>[+-]*[0-9]+) *(?P<unit>GiB|TiB)? *\((?P<delta>[+-][0-9]+) *(?P<oldunit>GiB|TiB)?\)')
         requota2 = re.compile('Update (?P<type>[^:]+) (?P<old>[0-9]+) -> (?P<new>[0-9]+)')
 
-        
+
         for line in self.quota_history.splitlines():
             if not remsg.match(line):
                 continue
@@ -209,17 +209,17 @@ class Projects:
         # FIXME!!! Hardcoding the role meaning!
 
         if 'admin' in session['auth']['roles'] or 'usermanager' in session['auth']['roles']:
-            projects = self.keystone.projects.list()
+            projects = self.keystone.projects.list(enabled=True)
             rolenames = {r.id: r.name for r in self.keystone.roles.list()}
             roles = self.keystone.role_assignments.list()
             myroles = self.keystone.role_assignments.list(user=self.session.get_user_id())
         elif 'project_admin' in session['auth']['roles']:
-            projects = self.keystone.projects.list(user=self.session.get_user_id())
+            projects = self.keystone.projects.list(user=self.session.get_user_id(), enabled=True)
             rolenames = {r.id: r.name for r in self.keystone.roles.list()}
             myroles = self.keystone.role_assignments.list(user=self.session.get_user_id())
             roles = myroles
         else:
-            projects = self.keystone.projects.list(user=self.session.get_user_id())
+            projects = self.keystone.projects.list(user=self.session.get_user_id(), enabled=True)
 
 
         if not session['auth']['regular_member']:
