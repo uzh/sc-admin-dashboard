@@ -52,24 +52,27 @@ class Users:
 
     def list_users(self, project_admins=False):
         users = []
-        
+
         assignments = self.list()
         try:
             projects = {p.id: p for p in self.keystone.projects.list()}
         except Forbidden:
             projects = None
         for uid in assignments:
-            user = self.keystone.users.get(uid)
-            if user.domain_id == 'default':
-                roles = assignments.get(uid)
-                if projects:
-                    for role in roles:
-                        role['project_name'] = projects[role['project']].name
-                u = {'id':uid,
-                     'email':user.email,
-                     'roles': roles}
-                users.append(u)
-
+            try:
+                user = self.keystone.users.get(uid)
+                if user.domain_id == 'default':
+                    roles = assignments.get(uid)
+                    if projects:
+                        for role in roles:
+                            role['project_name'] = projects[role['project']].name
+                    u = {'id':uid,
+                         'email':user.email,
+                         'roles': roles}
+                    users.append(u)
+            except http_NotFound:
+                # User not found. Ignoring
+                pass
         emails = [u['email'] for u in users]
 
         if project_admins:
@@ -122,7 +125,7 @@ class Users:
             def match(uid):
                 return regexp in uid
         return {uid:{'roles': u} for uid, u in self.list().items() if match(uid)}
-    
+
     def get(self, uid):
         try:
             user = self.keystone.users.get(uid)
@@ -146,10 +149,10 @@ class Users:
             }
             if projects:
                 r['project_name'] = projects[pid].name
-                
-                
+
+
             roles.append(r)
-                 
+
         return u
 
     def admin_emails(self):
