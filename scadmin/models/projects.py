@@ -61,7 +61,8 @@ class Project:
                     'institute',
                     'faculty',
                     'description',
-                    'name']:
+                    'name',
+                    'id']:
             try:
                 return getattr(self.project, attr)
             except AttributeError:
