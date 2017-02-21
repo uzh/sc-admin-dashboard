@@ -72,6 +72,10 @@ def create_project():
         # create project
         projects = Projects()
         project = projects.create(form)
+        app.logger.info("Project %s (%s) created by %s",
+                        project.name,
+                        project.id,
+                        session['auth']['user_id'])
         return redirect('project/%s' % project.id)
     return render_template('create-project.html', **data)
 
@@ -91,11 +95,11 @@ def show_project(project_id):
     reqerror = request.args.get('error')
     if reqerror:
         data['error'].append(reqerror)
-        
+
     reqinfo = request.args.get('info')
     if reqinfo:
         data['info'].append(reqinfo)
-    
+
     try:
         data['project'] =  Project(project_id)
     except InsufficientAuthorization:
@@ -112,7 +116,9 @@ def show_project(project_id):
             user = users.get(form.uid.data)
             data['project'].grant(form.uid.data, form.role.data)
 
-            data['info'].append('User %s (%s) added to project' % (user['id'], user['email']))
+            msg = 'User %s (%s) added to project' % (user['id'], user['email'])
+            data['info'].append(msg)
+            app.logger.info("%s by user %s", msg, session['auth']['user_id'])
 
             # Add user to mailing list
             if config.USE_SYMPA:
@@ -122,10 +128,14 @@ def show_project(project_id):
                 if err:
                     data['error'].append('Error while adding user to mailing list\n')
                     data['error'] += err
+                    app.logger.error(err)
                 if info:
                     data['info'] += info
+                    app.logger.info(infO)
         except Exception as ex:
-            data['error'].append("Error setting grant to user '%s': %s\n" % (form.uid.data, ex))
+            err = "Error setting grant to user '%s': %s\n" % (form.uid.data, ex)
+            data['error'].append(err)
+            app.logger.error(err)
 
 
     try:
@@ -144,6 +154,8 @@ def revoke_grant(project_id):
     project = Project(project_id)
     try:
         project.revoke(uid, role)
+        app.logger.info('Role %s for user %s removed from project %s (%s) by operator %s',
+                        role, uid, project.name, project.id, session['auth']['user_id'])
     except InsufficientAuthorization:
         return redirect(url_for('main.show_project',
                                 project_id=project_id,
@@ -196,6 +208,11 @@ def quota(project_id):
                     history.extend(["%s %s" % (curdate, line) for line in h_update])
                     data['info'].extend(h_update)
                     project.add_to_history(str.join('\n', history))
+
+                    app.logger.info("Project %s (%s): %s",
+                                    project.name,
+                                    project_id,
+                                    str.join(', ', [i[len(curdate)+1:] for i in history]))
             except Exception as ex:
                 app.logger.error("Error while updating history of project %s: %s",
                                   project.name, ex)

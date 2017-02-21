@@ -100,7 +100,7 @@ def get_session(project_id=None, project_domain_id=None):
 def authenticate_with_token(project_id=None, project_domain_id='default'):
     sess = get_session(project_id, project_domain_id)
     fill_session_data(sess)
-    app.logger.info("User {} authenticated on tenant tenant {} using token".format(session['auth']['user_id'], sess.auth.project_id))
+    app.logger.info("User {} authenticated on tenant {} using token".format(session['auth']['user_id'], sess.auth.project_id))
 
 
 def authenticated(f):
