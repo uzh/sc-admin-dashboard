@@ -131,7 +131,7 @@ def show_project(project_id):
                     app.logger.error(err)
                 if info:
                     data['info'] += info
-                    app.logger.info(infO)
+                    app.logger.info(info)
         except Exception as ex:
             err = "Error setting grant to user '%s': %s\n" % (form.uid.data, ex)
             data['error'].append(err)
