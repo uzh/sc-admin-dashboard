@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-#
 #
 #
-# Copyright (C) 2016, S3IT, University of Zurich. All rights reserved.
+# Copyright (C) 2016-2018, University of Zurich. All rights reserved.
 #
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -29,7 +29,7 @@ import re
 from scadmin.auth import get_session
 from scadmin.exceptions import InsufficientAuthorization
 from scadmin import config
-from scadmin.utils import to_bib
+from scadmin.utils import to_bib, find_security_group_by_name, find_security_group_rules
 
 from keystoneclient.v3 import client as keystone_client
 from keystoneauth1.exceptions.http import Forbidden
