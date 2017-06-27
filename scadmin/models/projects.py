@@ -35,9 +35,11 @@ from keystoneclient.v3 import client as keystone_client
 from keystoneauth1.exceptions.http import Forbidden
 
 from novaclient.client import Client as nova_client
+from neutronclient.v2_0 import client as neutron_client
+from neutronclient.common.exceptions import Conflict
 
 
-class Project:
+class Project(object):
     def __init__(self, name_or_id=None):
         self.session = get_session()
         self.keystone = keystone_client.Client(session=self.session)
@@ -51,6 +53,7 @@ class Project:
             for project in projects:
                 if project.id == self.session.auth.project_id:
                     self.project = project
+
 
     def __getattr__(self, attr):
         # Some attributes we want to pass them down to self.project
@@ -195,10 +198,13 @@ class Project:
 
         return quota_history
 
-class Projects:
+class Projects(object):
     def __init__(self):
         self.session = get_session()
         self.keystone = keystone_client.Client(session=self.session)
+        self.neutron = neutron_client.Client(session=self.session)
+        self.nova = nova_client('2', session=self.session)
+
         self.project = Project(self.session.auth.project_id).project
         self.id = self.project.id
         self.name = self.project.name
@@ -238,12 +244,13 @@ class Projects:
         return plist
 
     def create(self, form):
-        # WARNING: always creating projects in default domain
+        # FIXME: always creating projects in default domain
         domain = self.keystone.domains.get(config.os_project_domain_id)
         project = self.keystone.projects.create(
             form.name.data,
             domain,
             description=form.description.data,
+            enabled=False,  # will enable after configuring it
             owner=form.owner.data,
             owner_email=form.owner_email.data,
             contact=form.contact.data,
@@ -253,4 +260,12 @@ class Projects:
             faculty=form.faculty.data,
             institute=form.institute.data,
         )
+        # additional configuration
+        self.neutron.update_quota(project.id, {
+            'quota': {
+                'floatingip': 0,  # see: https://trello.com/c/ywH3WR8c/132-newly-created-project-have-a-10-floating-ips-quota-instead-of-0
+            },
+        })
+        # all done, enable project
+        self.keystone.projects.update(project, enabled=True)
         return project
