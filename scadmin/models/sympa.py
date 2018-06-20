@@ -91,7 +91,7 @@ class ML:
         form['dump'] = str.join('\n', [u for u in users if u and  '@' in u])
 
         if quiet:
-            form['quiet'].value = ['on']
+            form['quietly'].value = ['on']
 
         self.br.submit_form(form)
 
