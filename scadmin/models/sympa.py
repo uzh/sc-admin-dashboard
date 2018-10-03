@@ -34,8 +34,8 @@ class ML:
         self.url_review = '{}?sortby=email&action=review&list={}&size={}'.format(
             self.url_base, config.SYMPA_LIST, config.SYMPA_SIZE)
         self.url_remove = self.url_review
-        self.url_add = '%s/add_request/%s' % (self.url_base, config.SYMPA_LIST)
-
+        # SYMPA(6.2.32): changed url from 'add_request' to 'import'
+        self.url_add = '%s/import/%s' % (self.url_base, config.SYMPA_LIST)
         self.br = robobrowser.RoboBrowser(user_agent='Chrome', parser='html.parser')
         self.br.session.verify = False
         app.logger.warning("Disabling SSL verification to access %s", self.url_base)
@@ -90,8 +90,12 @@ class ML:
         form = self.br.get_forms()[1]
         form['dump'] = str.join('\n', [u for u in users if u and  '@' in u])
 
+        # SYMPA(6.2.32): changed back quietly to quiet.
         if quiet:
-            form['quietly'].value = ['on']
+            form['quiet'].value = ['quiet']
+        
+        # SYMPA(6.2.32): added mandatory form value.
+        form['action_import'].value = ['Add+subscribers']
 
         self.br.submit_form(form)
 
@@ -109,17 +113,18 @@ class ML:
             # to see if the line "is already subscribed to the list"
             # is present in the error message, and check if this is
             # the case for *all* the email addresses
-
             errorlines = [i.strip() for i in self.br.find(id='ErrorMsg').text.strip().splitlines()]
             for line in errorlines[:]:
-                if 'is already subscribed to the list' in line:
+                # SYMPA(6.2.32): "new" English translation.
+                if 'is already subscriber of list' in line:
                     info.append(line)
                     errorlines.remove(line)
             # If all the users were already subscribed, then the
             # errorlines list will only contain one line. In all other
             # cases, we extend the err list.
-            if errorlines != ['ERROR (add)  -']:
-                err.extend()
+            # SYMPA(6.2.32): 'ErrorMsg' now returns an extra empty line.
+            if errorlines != ['ERROR (import)  -', '']:
+                err.extend(errorlines)
 
         return info, err
 
