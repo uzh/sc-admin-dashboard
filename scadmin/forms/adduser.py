@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-#
 #
 #
-# Copyright (C) 2016, S3IT, University of Zurich. All rights reserved.
+# Copyright (C) 2016-2018, University of Zurich. All rights reserved.
 #
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -30,7 +30,7 @@ from scadmin import config
 class AddUserForm(FlaskForm):
     uid = StringField(
         'username',
-        [validators.Length(min=4), validators.DataRequired()]
+        [validators.Length(min=2), validators.DataRequired()]
     )
     role = SelectField(
         'Role',
