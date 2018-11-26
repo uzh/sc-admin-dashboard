@@ -29,7 +29,7 @@ import re
 from scadmin.auth import get_session
 from scadmin.exceptions import InsufficientAuthorization
 from scadmin import config
-from scadmin.utils import to_bib, find_security_group_by_name, find_security_group_rules
+from scadmin.utils import to_bib
 
 from keystoneclient.v3 import client as keystone_client
 from keystoneauth1.exceptions.http import Forbidden
