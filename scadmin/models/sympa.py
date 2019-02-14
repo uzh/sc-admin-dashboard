@@ -34,6 +34,7 @@ class ML:
         self.url_review = '{}?sortby=email&action=review&list={}&size={}'.format(
             self.url_base, config.SYMPA_LIST, config.SYMPA_SIZE)
         self.url_remove = self.url_review
+        self.url_login = '%s/login' % (self.url_base)
         # SYMPA(6.2.32): changed url from 'add_request' to 'import'
         self.url_add = '%s/import/%s' % (self.url_base, config.SYMPA_LIST)
         self.br = robobrowser.RoboBrowser(user_agent='Chrome', parser='html.parser')
@@ -43,9 +44,9 @@ class ML:
 
     def login(self):
         """Login to the mailing list"""
-        self.br.open(self.url_base)
+        self.br.open(self.url_login)
 
-        form = self.br.get_forms()[1]
+        form = self.br.get_forms()[3]
 
         form['email'] = config.SYMPA_USERNAME
         form['passwd'] = config.SYMPA_PASSWORD
