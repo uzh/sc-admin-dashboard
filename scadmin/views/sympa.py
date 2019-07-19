@@ -54,7 +54,7 @@ def list_users():
         return render_template('ml_users.html', **data)
         
 
-    all_users = scusers.list_users(project_admins=True)
+    all_users = scusers.list_users(project_admins=False)
     users_email = [u['email'] for u in all_users] + [i[1] for i in config.SYMPA_EMAIL_MAPPINGS if i[1]]
 
     missing_email, exceeding = ml.missing_and_exceeding(users_email)
