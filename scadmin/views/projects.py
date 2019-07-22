@@ -124,7 +124,7 @@ def show_project(project_id):
             if config.USE_SYMPA:
                 ml = ML()
                 ml.login()
-                info, err = ml.add([user['email']])
+                info, err = ml.add([user['email']],quiet=False)
                 if err:
                     data['error'].append('Error while adding user to mailing list\n')
                     data['error'] += err
