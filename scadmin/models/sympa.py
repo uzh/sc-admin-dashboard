@@ -76,7 +76,7 @@ class ML:
 
     def missing_and_exceeding(self, users):
         users = [u.lower() for u in users if u and u.strip()]
-        subscribers = self.list(allusers=True)
+        subscribers = [s.strip() for s in self.list(allusers=True) if s and s.strip()]
         missing = set(users).difference(subscribers)
         exceeding = set(subscribers).difference(users)
         return missing, exceeding
