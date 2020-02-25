@@ -21,6 +21,7 @@
 
 __docformat__ = 'reStructuredText'
 __author__ = 'Antonio Messina <antonio.s.messina@gmail.com>'
+__author__ = 'Mattia Belluco <mattia.belluco@uzh.ch>'
 
 import robobrowser
 from flask import session, current_app as app
@@ -31,12 +32,18 @@ from scadmin import config
 class ML:
     def __init__(self):
         self.url_base = '%s/sympa' % config.SYMPA_URL
+        self.lists = []
+        if isinstance(config.SYMPA_LISTS, str):
+            self.lists.append(config.SYMPA_LISTS)
+        elif isinstance(config.SYMPA_LISTS, tuple):
+            self.lists.extend(config.SYMPA_LISTS)
+        else:
+            app.logger.error("Error in parsing config.SYMPA_LISTS")
         self.url_review = '{}?sortby=email&action=review&list={}&size={}'.format(
-            self.url_base, config.SYMPA_LIST, config.SYMPA_SIZE)
+            self.url_base, self.lists[0], config.SYMPA_SIZE)
         self.url_remove = self.url_review
         self.url_login = '%s/login' % (self.url_base)
         # SYMPA(6.2.32): changed url from 'add_request' to 'import'
-        self.url_add = '%s/import/%s' % (self.url_base, config.SYMPA_LIST)
         self.br = robobrowser.RoboBrowser(user_agent='Chrome', parser='html.parser')
         self.br.session.verify = False
         app.logger.warning("Disabling SSL verification to access %s", self.url_base)
@@ -86,46 +93,49 @@ class ML:
 
         Returns two lists `info`, `err` containins info and error messages
         """
-        self.open(self.url_add)
-
-        form = self.br.get_forms()[1]
-        form['dump'] = str.join('\n', [u for u in users if u and  '@' in u])
-
-        # SYMPA(6.2.32): changed back quietly to quiet.
-        if quiet:
-            form['quiet'].value = ['quiet']
-        
-        # SYMPA(6.2.32): added mandatory form value.
-        form['action_import'].value = ['Add+subscribers']
-
-        self.br.submit_form(form)
-
         info, err = [], []
-        if self.br.find(id='ephemeralMsg'):
-            info.extend(self.br.find(id='ephemeralMsg').text.strip().splitlines())
-        if self.br.find(id='ErrorMsg'):
-            # S3IT issue3567: when adding an user to the mailing list
-            # Sympa is returning an error, but for us this is not
-            # really an error, rather an informational message, as we
-            # will get this "error" every time we add an user to more
-            # than one tenant. Let's therefore add it to info instead.
-            #
-            # To identify if this is actually an error or not, we need
-            # to see if the line "is already subscribed to the list"
-            # is present in the error message, and check if this is
-            # the case for *all* the email addresses
-            errorlines = [i.strip() for i in self.br.find(id='ErrorMsg').text.strip().splitlines()]
-            for line in errorlines[:]:
-                # SYMPA(6.2.32): "new" English translation.
-                if 'is already subscriber of list' in line:
-                    info.append(line)
-                    errorlines.remove(line)
-            # If all the users were already subscribed, then the
-            # errorlines list will only contain one line. In all other
-            # cases, we extend the err list.
-            # SYMPA(6.2.32): 'ErrorMsg' now returns an extra empty line.
-            if errorlines != ['ERROR (import)  -', '']:
-                err.extend(errorlines)
+        for ml in self.lists:
+            url_add = '%s/import/%s' % (self.url_base, ml)
+            self.open(url_add)
+    
+            form = self.br.get_forms()[1]
+            form['dump'] = str.join('\n', [u for u in users if u and  '@' in u])
+    
+            # SYMPA(6.2.32): changed back quietly to quiet.
+            if quiet:
+                form['quiet'].value = ['quiet']
+            
+            # SYMPA(6.2.32): added mandatory form value.
+            form['action_import'].value = ['Add+subscribers']
+    
+            self.br.submit_form(form)
+    
+            if self.br.find(id='ephemeralMsg'):
+                info.extend(self.br.find(id='ephemeralMsg').text.strip().splitlines())
+            if self.br.find(id='ErrorMsg'):
+                # S3IT issue3567: when adding an user to the mailing list
+                # Sympa is returning an error, but for us this is not
+                # really an error, rather an informational message, as we
+                # will get this "error" every time we add an user to more
+                # than one tenant. Let's therefore add it to info instead.
+                #
+                # To identify if this is actually an error or not, we need
+                # to see if the line "is already subscribed to the list"
+                # is present in the error message, and check if this is
+                # the case for *all* the email addresses
+                errorlines = [i.strip() for i in self.br.find(id='ErrorMsg').text.strip().splitlines()]
+                for line in errorlines[:]:
+                    # SYMPA(6.2.32): "new" English translation.
+                    if 'is already subscriber of list' in line:
+                        errorlines.remove(line)
+                        line = line[:-3] + ml
+                        info.append(line)
+                # If all the users were already subscribed, then the
+                # errorlines list will only contain one line. In all other
+                # cases, we extend the err list.
+                # SYMPA(6.2.32): 'ErrorMsg' now returns an extra empty line.
+                if errorlines != ['ERROR (import)  -', '']:
+                    err.extend(errorlines)
 
         return info, err
 
