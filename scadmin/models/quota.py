@@ -170,6 +170,7 @@ class Quota:
                 del toupdate['swift'][key]
             else:
                 updated['swift'][key] = (self.quota['swift'][key], toupdate['swift'][key])
+        self._update_swift_quota(toupdate['swift'])
 
         # Re-read from API
         self.update_quota()
