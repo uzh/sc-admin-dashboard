@@ -111,10 +111,12 @@ class SetQuotaForm(FlaskForm):
     submit = SubmitField('Set quota')
 
     def validate_c_ram(form, field):
-        diff = field.data - 4*2**30*form.c_cores.data
-        if not form.force.data and abs(float(diff)/field.data) > 0.01:
-            raise validators.ValidationError(
-                "Ram should be 4 GiB x nr.vcores, in this case: %s (%s) instead of %s" % (b_to_human(4*2**30*form.c_cores.data), 4*2**30*form.c_cores.data, b_to_human(field.data)))
+        diff4 = field.data - 4*2**30*form.c_cores.data
+        diff8 = field.data - 8*2**30*form.c_cores.data
+        if not form.force.data and abs(float(diff8)/field.data) > 0.01:
+            if abs(float(diff4)/field.data) > 0.01:
+              raise validators.ValidationError(
+                "Ram should be 4 or 8 GiB x nr.vcores, in case of 4:1 use %s (%s) instead of %s" % (b_to_human(4*2**30*form.c_cores.data), 4*2**30*form.c_cores.data, b_to_human(field.data)))
 
     def validate_n_port(form, field):
         if field.data < form.c_instances.data:
