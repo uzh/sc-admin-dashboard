@@ -56,7 +56,7 @@ class Quota:
             self.storage_url = swift_endpoint.url % dict(tenant_id=self.project_id)
             app.logger.info("Using swift storage_url %s", self.storage_url)
             account = swiftclient.head_account(self.storage_url, self.session.get_token())
-            swift_curquota = account.get('x-account-meta-quota-bytes', -1)
+            swift_curquota = account.get('x-account-meta-quota-bytes', 0)
         except Exception as ex:
             app.logger.warning("No swift endpoint found. (exception was: %s", ex)
             swift_curquota = -1
@@ -166,11 +166,11 @@ class Quota:
         self.neutron.update_quota(self.project_id, {'quota': toupdate['neutron']})
 
         for key, value in list(toupdate['swift'].items()):
-            if value is None or value == self.quota['swift'][key]:
+            if value is None or value == int(self.quota['swift'][key]):
                 del toupdate['swift'][key]
             else:
                 updated['swift'][key] = (self.quota['swift'][key], toupdate['swift'][key])
-        self._update_swift_quota(toupdate['swift'])
+                self._update_swift_quota(toupdate['swift'])
 
         # Re-read from API
         self.update_quota()
